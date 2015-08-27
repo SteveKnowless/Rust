@@ -1,0 +1,8 @@
+{
+  "Messages": {
+    "InstalledPlugins": "<size=18><b><color=#FAB269>Installed plugin(s)</color></b></size>:",
+    "NoPluginFound": "No plugin found with that name!",
+    "PluginDesc": "\n<size=15>{description}</size>",
+    "PluginTitle": "<size=18><b><color=#FAB269>{title} v{version}</color></b></size>"
+  }
+}

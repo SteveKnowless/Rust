@@ -1,0 +1,39 @@
+{
+  "GUI Kit: max x": "0.8",
+  "GUI Kit: max y": "0.8",
+  "GUI Kit: min x": "0.5",
+  "GUI Kit: y height": "0.05",
+  "GUI Message: max x": "0.5",
+  "GUI Message: max y": "0.8",
+  "GUI Message: min x": "0.2",
+  "GUI Message: min y": "0.2",
+  "Messages: cantUseKit": "You are not allowed to use this kit",
+  "Messages: itemNotFound": "Item not found: ",
+  "Messages: Kit in Cooldown": "You must wait {0}s before using this kit again",
+  "Messages: kitredeemed": "You've redeemed a kit",
+  "Messages: kitsreset": "All kits data from players were deleted",
+  "Messages: maxKitReached": "You've used all your tokens for this kit",
+  "Messages: noAccess": "You are not allowed to use this command",
+  "Messages: unknownKit": "This kit doesn't exist",
+  "NPC Kits": {
+    "123456": [
+      "stones",
+      "building",
+      "vipkit"
+    ],
+    "999999": [
+      "stones",
+      "building",
+      "vipkit"
+    ]
+  },
+  "NPC Messages": {
+    "123456": "Welcome on this server, Here is a list of free kits that you can get <color=red>only once each</color>\n\n                      <color=green>Enjoy your stay</color>",
+    "999999": "<color=red>Only VIPs are allowed to get kits from me</color>"
+  },
+  "Settings: authLevel": 1,
+  "Settings: Permissions List": [
+    "vip",
+    "donator"
+  ]
+}

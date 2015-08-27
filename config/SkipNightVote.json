@@ -1,0 +1,21 @@
+{
+  "Messages": {
+    "noPollOpen": "No poll is open at this time.",
+    "alreadyVoted": "You have already voted once.",
+    "voteProgress": "Vote progress: {0} / {1} ({2}%/{3}%)",
+    "voteOpenTime": "Night time skip vote is now open for {0} minute(s).",
+    "voteSuccessful": "Vote was successful, it will be daytime soon.",
+    "voteFailed": "Vote failed, not enough players voted to skip night time.",
+    "voteReOpenTime": "Vote will re-open in {0} minute(s).",
+    "voteNow": "Type <color=#FF2211>/voteday</color> now to skip night time."
+  },
+  "Settings": {
+    "displayVoteProgress": false,
+    "pollRetryTime": 5.0,
+    "pollTimer": 2.5,
+    "requiredVotesPercentage": 0.6,
+    "sunriseHour": 7,
+    "sunsetHour": 19
+  },
+  "Version": "1.1.0"
+}

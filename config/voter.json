@@ -1,0 +1,69 @@
+{
+  "Messages": {
+    "ChatFormat": "<color=#af5>{NAME}:</color> {MESSAGE}",
+    "ChatName": "[Voter]",
+    "ChatPlayerIcon": true,
+    "Help": [
+      "/vote -- show a list of available urls for voting and get points for voting",
+      "/rewards -- show the rewards information and your points",
+      "/rewards [ID] -- get the reward"
+    ],
+    "RewardGived": "You got your reward!",
+    "RewardNotFound": "Reward with this ID cann't be found!",
+    "RewardNotPoints": "You do not have enough points for this reward!",
+    "RewardsBalance": "Your points: %s",
+    "RewardsBegin": "-------- /rewards [id] (Get Reward) --------",
+    "RewardsEnd": "-------------------------------------------------",
+    "RewardsList": "Points: {PRICE}, Reward: {REWARD}",
+    "StatusBadApiKey": "Invalid API key.",
+    "StatusCanVote": "You can vote at '%s' (Points for voting: %i)",
+    "StatusGetPoint": "Thanks for vote! (Points received: %s)",
+    "StatusNotAvailable": "The tracker is not available now. Please try again later."
+  },
+  "Settings": {
+    "DataFile": "VoterData",
+    "Rewards": [
+      {
+        "price": 3,
+        "reward": {
+          "bow_hunting": 2,
+          "burlap_shoes": 1,
+          "burlap_shoes_bp": 1
+        }
+      },
+      {
+        "price": 4,
+        "reward": {
+          "Money": 50,
+          "shotgun_waterpipe": 2
+        }
+      },
+      {
+        "price": 5,
+        "reward": {
+          "Money": 400,
+          "smg_thompson": 1
+        }
+      }
+    ],
+    "RewardsCommand": "rewards",
+    "Trackers": {
+      "[Rust-ServerList]": {
+        "ID": "",
+        "Key": "",
+        "PointsForVote": 1
+      },
+      "[Rust-Servers]": {
+        "ID": "",
+        "Key": "",
+        "PointsForVote": 1
+      },
+      "[TopRustServers]": {
+        "ID": "",
+        "Key": "",
+        "PointsForVote": 1
+      }
+    },
+    "VoteCommand": "vote"
+  }
+}

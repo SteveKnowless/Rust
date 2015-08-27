@@ -1,0 +1,15 @@
+{
+  "Debug": {
+    "outputToRcon": false
+  },
+  "Mutipliers": {
+    "armoredMultiplier": 1.0,
+    "campfireMultiplier": 0.0,
+    "highStoneWallMultiplier": 1.0,
+    "highWoodWallMultiplier": 1.0,
+    "sheetMultiplier": 1.0,
+    "stoneMultiplier": 1.0,
+    "twigMultiplier": 1.0,
+    "woodMultiplier": 1.0
+  }
+}

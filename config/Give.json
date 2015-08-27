@@ -1,0 +1,17 @@
+{
+  "authLevel": {
+    "give": 1,
+    "giveall": 2,
+    "givekit": 1
+  },
+  "Give": {
+    "logAdmins": true,
+    "overrightStackable": false
+  },
+  "Messages": {
+    "itemNotFound": "This item doesn't exist: ",
+    "multiplePlayersFound": "Multiple Players Found",
+    "noAccess": "You are not allowed to use this command",
+    "noPlayersFound": "No Players Found"
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "ADVERTS": [
+    "Want to know the available commands? Type <orange>/help<end>.",
+    "Respect the server <orange>/rules<end>.",
+    "This server is running <orange>Oxide 2<end>.",
+    "<red>Cheating is strictly prohibited.<end>",
+    "Type <orange>/map<end> for the server map link.",
+    "<orange>Players Online: <lime>{players}<end> / <lime>{maxplayers}<end> Sleepers: <lime>{sleepers}<end><end>",
+    "See where you are on the server map at: <lime>http://gameserver-25u.cloudapp.net:28015<end>"
+  ],
+  "COLORS": {
+    "ADVERTS": "silver",
+    "BOARDS TITLE": "silver",
+    "JOIN MESSAGE": "silver",
+    "LEAVE MESSAGE": "silver",
+    "PREFIX": "#00EEEE",
+    "SYSTEM": "white",
+    "WELCOME MESSAGE": "silver"
+  },
+  "COMMANDS": {
+    "ADMINS LIST": "admins",
+    "ADVERTS COMMAND": "adverts",
+    "MAP LINK": "map",
+    "PLAYERS LIST": "players",
+    "PLAYERS ONLINE": "online",
+    "PLUGINS LIST": "plugins",
+    "RULES": [
+      "rules",
+      "regras",
+      "regles"
+    ]
+  },
+  "CONFIG_VERSION": 5.3,
+  "MESSAGES": {
+    "ADMINS LIST DESC": "<orange>/admins<end> <grey>-<end> List of online <cyan>Admins<end> in the server.",
+    "ADMINS LIST TITLE": "ADMINS ONLINE",
+    "ADMINS ONLINE": "There are <cyan>{admins} Admins<end> online.",
+    "ADVERTS DESC": "<orange>/adverts<end> <grey>-<end> Allows <cyan>Admins<end> to change the adverts interval ( i.g: /adverts 5 )",
+    "ADVERTS INTERVAL CHANGED": "Adverts interval changed to <lime>{minutes}<end> minutes",
+    "CHECK CONSOLE": "Check the console (press F1) for more info.",
+    "JOIN MESSAGE": "{username} joined the server, from <orange>{country}<end>.",
+    "LEAVE MESSAGE": "{username} left the server. (Reason: {reason})",
+    "MAP LINK": "See where you are on the server map at: <lime>http://gameserver-25u.cloudapp.net:28015<end>",
+    "MAP LINK DESC": "<orange>/map<end> <grey>-<end> Server map url.",
+    "NO ADMINS": "There are no <cyan>Admins<end> online.",
+    "NO LANG": "Error, <lime>{args}<end> language not supported or does not exist.",
+    "NO RULES": "Error, no rules found, contact the <cyan>Admins<end>.",
+    "PLAYERS LIST DESC": "<orange>/players<end> <grey>-<end> List of all players in the server.",
+    "PLAYERS LIST TITLE": "PLAYERS LIST",
+    "PLAYERS ONLINE": "There are <lime>{active}<end>/<lime>{maxplayers}<end> players online.",
+    "PLAYERS ONLINE DESC": "<orange>/online<end> <grey>-<end> Shows the number of players and <cyan>Admins<end> online, plus a few server stats.",
+    "PLAYERS ONLINE TITLE": "PLAYERS ONLINE",
+    "PLAYERS STATS": "Sleepers: <lime>{sleepers}<end> Alltime Players: <lime>{alltime}<end>",
+    "PLUGINS LIST DESC": "<orange>/plugins<end> <grey>-<end> List of plugins installed in the server.",
+    "PLUGINS LIST TITLE": "SERVER PLUGINS",
+    "RULES DESC": "<orange>/rules<end> <grey>-<end> List of server rules.",
+    "RULES TITLE": "SERVER RULES",
+    "SYNTAX ERROR": "Syntax Error: {syntax}"
+  },
+  "RULES": {
+    "DE": [
+      "Cheaten ist verboten!",
+      "Respektiere alle Spieler",
+      "Spam im Chat zu vermeiden.",
+      "Spiel fair und missbrauche keine Bugs oder Exploits."
+    ],
+    "DK": [
+      "Snyd er strengt forbudt.",
+      "Respekt alle spillere.",
+      "Undgå spam i chatten.",
+      "Play fair og ikke misbruger af bugs / exploits."
+    ],
+    "EN": [
+      "Cheating is strictly prohibited.",
+      "Respect all players",
+      "Avoid spam in chat.",
+      "Play fair and don't abuse of bugs/exploits."
+    ],
+    "ES": [
+      "Los trucos están terminantemente prohibidos.",
+      "Respeta a todos los jugadores.",
+      "Evita el Spam en el chat.",
+      "Juega limpio y no abuses de bugs/exploits."
+    ],
+    "FR": [
+      "Tricher est strictement interdit.",
+      "Respectez tous les joueurs.",
+      "Évitez le spam dans le chat.",
+      "Jouer juste et ne pas abuser des bugs / exploits."
+    ],
+    "IT": [
+      "Cheating è severamente proibito.",
+      "Rispettare tutti i giocatori.",
+      "Evitare lo spam in chat.",
+      "Fair Play e non abusare di bug / exploit."
+    ],
+    "NL": [
+      "Vals spelen is ten strengste verboden.",
+      "Respecteer alle spelers",
+      "Vermijd spam in de chat.",
+      "Speel eerlijk en maak geen misbruik van bugs / exploits."
+    ],
+    "PT": [
+      "Usar cheats e totalmente proibido.",
+      "Respeita todos os jogadores.",
+      "Evita spam no chat.",
+      "Nao abuses de bugs ou exploits."
+    ],
+    "RO": [
+      "Cheaturile sunt strict interzise!",
+      "Respectați toți jucătorii!",
+      "Evitați spamul în chat!",
+      "Jucați corect și nu abuzați de bug-uri/exploituri!"
+    ],
+    "RU": [
+      "Запрещено использовать читы.",
+      "Запрещено спамить и материться.",
+      "Уважайте других игроков.",
+      "Играйте честно и не используйте баги и лазейки."
+    ],
+    "TR": [
+      "Hile kesinlikle yasaktır.",
+      "Tüm oyuncular Saygı.",
+      "Sohbet Spam kaçının.",
+      "Adil oynayın ve böcek / açıkları kötüye yok."
+    ],
+    "UA": [
+      "Обман суворо заборонено.",
+      "Поважайте всіх гравців",
+      "Щоб уникнути спаму в чаті.",
+      "Грати чесно і не зловживати помилки / подвиги."
+    ]
+  },
+  "SETTINGS": {
+    "ADVERTS INTERVAL": 6,
+    "BROADCAST TO CONSOLE": true,
+    "ENABLE ADMINS LIST": false,
+    "ENABLE ADVERTS": true,
+    "ENABLE ADVERTS COMMAND": true,
+    "ENABLE JOIN MESSAGE": true,
+    "ENABLE LEAVE MESSAGE": true,
+    "ENABLE MAP LINK": true,
+    "ENABLE PLAYERS DEFAULT COLORS": true,
+    "ENABLE PLAYERS LIST": true,
+    "ENABLE PLAYERS ONLINE": true,
+    "ENABLE PLUGIN ICON": true,
+    "ENABLE PLUGINS LIST": false,
+    "ENABLE RULES": true,
+    "ENABLE WELCOME MESSAGE": true,
+    "HIDE ADMINS": true,
+    "PLAYERS LIST ON CHAT": true,
+    "PLAYERS LIST ON CONSOLE": true,
+    "PREFIX": "NOTIFIER",
+    "RULES LANGUAGE": "AUTO"
+  },
+  "WELCOME MESSAGE": [
+    "<size=17>Welcome {username}</size>",
+    "<orange><size=20>•</size><end> Type <orange>/help<end> for all available commands.",
+    "<orange><size=20>•</size><end> Check our server <orange>/rules<end>.",
+    "<orange><size=20>•</size><end> See where you are on the server map at: <lime>http://gameserver-25u.cloudapp.net:28015<end>"
+  ]
+}

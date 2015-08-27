@@ -1,0 +1,13 @@
+{
+  "Messages": {
+    "AuthLevelSet": "Auth level set to {level} for {player}!",
+    "ChatHelp": "Use '/authlevel player authlevel' to set the auth level for player",
+    "ConsoleHelp": "Use 'authlevel player authlevel' to set the auth level for player",
+    "InvalidAuthLevel": "Invalid auth level! Valid levels are 0 (player), 1 (moderator), and 2 (owner)",
+    "InvalidTarget": "Invalid player name! Please try again",
+    "NoPermission": "You do not have permission to use this command!"
+  },
+  "Settings": {
+    "Command": "authlevel"
+  }
+}

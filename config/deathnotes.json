@@ -1,0 +1,305 @@
+{
+  "Animals": {
+    "Bear": "Bear",
+    "Boar": "Boar",
+    "Chicken": "Chicken",
+    "Horse": "Horse",
+    "Stag": "Stag",
+    "Wolf": "Wolf"
+  },
+  "ANIMALS": {
+    "BEAR": "Bear",
+    "BOAR": "Boar",
+    "CHICKEN": "Chicken",
+    "HORSE": "Horse",
+    "STAG": "Stag",
+    "WOLF": "Wolf"
+  },
+  "BARRICADES": {
+    "BARRICADE.METAL": "Metal Barricade",
+    "BARRICADE.WOOD": "Wooden Barricade",
+    "BARRICADE.WOODWIRE": "Barbed Wooden Barricade",
+    "WALL.EXTERNAL.HIGH.WOOD.PREFAB": "High External Wooden Wall"
+  },
+  "Bodyparts": {
+    "": "",
+    "Calf": "Calf",
+    "Clavicle": "Clavicle",
+    "Ear": "Ear",
+    "Eye": "Eye",
+    "Group": "Group",
+    "Head": "Head",
+    "Jaw": "Jaw",
+    "Little": "Little",
+    "None": "None",
+    "Penis": "Penis",
+    "Reye": "Reye",
+    "Rlittle": "Rlittle",
+    "Spine": "Spine",
+    "Tail": "Tail",
+    "Tongue": "Tongue",
+    "Upperarm": "Upperarm"
+  },
+  "BODYPARTS": {
+    "ARM": "Arm",
+    "BROW": "Brow",
+    "CALF": "Calf",
+    "CLAVICLE": "Clavicle",
+    "EAR": "Ear",
+    "EYE": "Eye",
+    "FINGERS": "Fingers",
+    "FOOT": "Feet",
+    "FOREARM": "Forearm",
+    "GROUP": "Group",
+    "HAND": "Hand",
+    "HEAD": "Head",
+    "HIP": "Hip",
+    "JAW": "Jaw",
+    "JOINT": "Joint",
+    "KNEE": "Knee",
+    "LEG": "Leg",
+    "LIP": "Lips",
+    "MANE": "Mane",
+    "NECK": "Neck",
+    "PELVIS": "Pelvis",
+    "PENIS": "Penis",
+    "ROOTBONE": "Chicken Rootbone",
+    "SHIN": "Shin",
+    "SHOULDER": "Shoulder",
+    "SPINE": "Spine",
+    "STOMACH": "Stomach",
+    "TAIL": "Tail",
+    "THIGH": "Thigh",
+    "TOE": "Toe",
+    "TONGUE": "Tongue",
+    "ULNA": "Ulna",
+    "UPPERARM": "Upperarm",
+    "WING": "Wing"
+  },
+  "Colors": {
+    "Animal": "#4B75FF",
+    "Attacker": "#4B75FF",
+    "Bodypart": "#4B75FF",
+    "Distance": "#4B75FF",
+    "Message": "#E0E0E0",
+    "Prefix": "grey",
+    "Victim": "#4B75FF",
+    "Weapon": "#4B75FF"
+  },
+  "COLORS": {
+    "ANIMAL": "#00FF00",
+    "ATTACKER": "#00FF00",
+    "BODYPART": "#00FF00",
+    "DISTANCE": "#00FF00",
+    "MESSAGE": "#FFFFFF",
+    "PREFIX": "#FF0000",
+    "VICTIM": "#00FF00",
+    "WEAPON": "#00FF00"
+  },
+  "CONFIG_VERSION": 4.7,
+  "Messages": {
+    "AnimalDeath": "{attacker} killed a {victim} with a {weapon} from {distance}m.",
+    "Arrow": "{attacker} killed {victim} with an arrow at {distance}m, hitting the {bodypart}.",
+    "ArrowSleep": "{attacker} killed {victim} with an arrow from {distance}m, while he slept.",
+    "Barricade": "{victim} died stuck on a {attacker}.",
+    "Bite": "A {attacker} killed {victim}.",
+    "BiteSleep": "A {attacker} killed {victim}, while he slept.",
+    "Bleeding": "{victim} bled to death.",
+    "Blunt": "{attacker} killed {victim} with a {weapon} and hit the {bodypart}.",
+    "BluntSleep": "{attacker} killed {victim} with a {weapon}, while he slept.",
+    "Bullet": "{attacker} killed {victim} with a {weapon}, hitting the {bodypart} from {distance}m.",
+    "BulletSleep": "{attacker} killed {victim}, while sleeping. (In the {bodypart} with a {weapon}, from {distance}m)",
+    "Cold": "{victim} froze to death.",
+    "Drowned": "{victim} thought he could swim.",
+    "Explosion": "{victim} got blown up.",
+    "Fall": "{victim} fell to his death.",
+    "Generic": "{victim} died.",
+    "Heat": "{victim} burned to death.",
+    "Hunger": "{victim} starved to death.",
+    "Poision": "{victim} died poisoned.",
+    "Radiation": "{victim} did not know that radiation kills.",
+    "Slash": "{attacker} sliced {victim} into pieces with a {weapon} and hit the {bodypart}.",
+    "SlashSleep": "{attacker} stabbed {victim}, while he slept.",
+    "Stab": "{attacker} stabbed {victim} to death with a {weapon} and hit the {bodypart}.",
+    "StabSleep": "{attacker} stabbed {victim}, while he slept.",
+    "Suicide": "{victim} committed suicide.",
+    "Thirst": "{victim} died dehydrated.",
+    "Trap": "{victim} stepped on a {attacker}."
+  },
+  "MESSAGES": {
+    "ANIMAL DEATH": [
+      "{attacker} killed a {victim} with a {weapon} from {distance}m."
+    ],
+    "ARROW": [
+      "{attacker} killed {victim} with an arrow {distance}m, hitting the {bodypart}."
+    ],
+    "ARROW SLEEP": [
+      "{attacker} killed {victim} with an arrow from {distance}m, while he slept."
+    ],
+    "BARRICADE": [
+      "{victim} died stuck on a {attacker}."
+    ],
+    "BITE": [
+      "A {attacker} killed {victim}."
+    ],
+    "BITE SLEEP": [
+      "A {attacker} killed {victim}, while he slept."
+    ],
+    "BLEEDING": [
+      "{victim} bled to death.",
+      "{victim} emptied in blood."
+    ],
+    "BLUNT": [
+      "{attacker} killed {victim} with a {weapon} and hit the {bodypart}.",
+      "{attacker} killed {victim} with a {weapon} causing a blunt trauma."
+    ],
+    "BLUNT SLEEP": [
+      "{attacker} killed {victim} with a {weapon}, while he slept."
+    ],
+    "BULLET": [
+      "{attacker} killed {victim} with a {weapon}, hitting the {bodypart} from {distance}m.",
+      "{attacker} made {victim} eat some bullets with a {weapon} from {distance}m."
+    ],
+    "BULLET SLEEP": [
+      "{attacker} killed {victim}, while sleeping. (In the {bodypart} with a {weapon}, from {distance}m)",
+      "{attacker} killed {victim} with a {weapon}, while sleeping."
+    ],
+    "COLD": [
+      "{victim} froze to death.",
+      "{victim} is an ice cold dead man."
+    ],
+    "DROWNED": [
+      "{victim} drowned.",
+      "{victim} thought he could swim."
+    ],
+    "EXPLOSION": [
+      "{victim} died from a {weapon} explosion.",
+      "A {attacker} blew {victim} up with a {weapon}."
+    ],
+    "FALL": [
+      "{victim} died from a big fall.",
+      "{victim} fell to his death."
+    ],
+    "GENERIC": [
+      "{victim} died.",
+      "{victim} has been killed by the gods."
+    ],
+    "HEAT": [
+      "{victim} burned to death."
+    ],
+    "HUNGER": [
+      "{victim} starved to death.",
+      "{victim} should learn how to hunt so he finds something to eat."
+    ],
+    "POISON": [
+      "{victim} died poisoned."
+    ],
+    "RADIATION": [
+      "{victim} died from radiation.",
+      "{victim} did not know that radiation kills."
+    ],
+    "SLASH": [
+      "{attacker} sliced {victim} into pieces with a {weapon} and hit the {bodypart}."
+    ],
+    "SLASH SLEEP": [
+      "{attacker} stabbed {victim}, while he slept."
+    ],
+    "STAB": [
+      "{attacker} stabbed {victim} to death with a {weapon} and hit the {bodypart}."
+    ],
+    "STAB SLEEP": [
+      "{attacker} stabbed {victim}, while he slept."
+    ],
+    "SUICIDE": [
+      "{victim} committed suicide.",
+      "{victim} has put an end to his life."
+    ],
+    "THIRST": [
+      "{victim} died of thirst.",
+      "{victim} died dehydrated."
+    ],
+    "TRAP": [
+      "{victim} stepped on a {attacker}."
+    ]
+  },
+  "Settings": {
+    "BroadcastToConsole": true,
+    "EnablePluginIcon": true,
+    "MessageInRadius": false,
+    "MessageRadius": 300,
+    "Prefix": "DEATH NOTES<color=white>:</color>",
+    "ShowAnimalDeaths": false,
+    "ShowAnimalKills": true,
+    "ShowBarricadeDeaths": true,
+    "ShowExplosionDeaths": true,
+    "ShowMetabolismDeaths": true,
+    "ShowPlayerKills": true,
+    "ShowSuicides": true,
+    "ShowTrapDeaths": true
+  },
+  "SETTINGS": {
+    "BROADCAST TO CONSOLE": true,
+    "ENABLE PLUGIN ICON": true,
+    "MESSAGE IN RADIUS": false,
+    "MESSAGES RADIUS": 300.0,
+    "PREFIX": "DEATH NOTES",
+    "SHOW ANIMAL DEATHS": false,
+    "SHOW ANIMAL KILLS": true,
+    "SHOW BARRICADE DEATHS": true,
+    "SHOW EXPLOSION DEATHS": true,
+    "SHOW METABOLISM DEATHS": true,
+    "SHOW PLAYER KILLS": true,
+    "SHOW SUICIDES": true,
+    "SHOW TRAP DEATHS": true
+  },
+  "TRAPS": {
+    "BEARTRAP": "Snap Trap",
+    "FLOOR_SPIKES": "Wooden Floor Spike",
+    "LANDMINE": "Landmine"
+  },
+  "Weapons": {
+    "": "",
+    "Bolt Action Rifle": "Bolt Action Rifle",
+    "Eoka Pistol": "Eoka Pistol",
+    "Hunting Bow": "Hunting Bow",
+    "Longsword": "Longsword",
+    "Rock": "Rock",
+    "Semi-Automatic Pistol": "Semi-Automatic Pistol",
+    "Torch": "Torch"
+  },
+  "WEAPONS": {
+    "2HANDED_CLEAVER.WEAPON": "Salvaged Cleaver",
+    "2HANDED_MACE.WEAPON": "Mace",
+    "2HANDED_SWORD.WEAPON": "Salvaged Sword",
+    "AK47U.WEAPON": "Assault Rifle",
+    "BOLTRIFLE.WEAPON": "Bolt Action Rifle",
+    "BONE_CLUB.WEAPON": "Bone Club",
+    "BONEKNIFE.WEAPON": "Bone Knife",
+    "CLEAVER.WEAPON": "Machete",
+    "CROSSBOW.WEAPON": "Crossbow",
+    "EOKA.WEAPON": "EOKA Pistol",
+    "GRENADE.BEANCAN.DEPLOYED": "Beancan Grenade",
+    "GRENADE.F1.DEPLOYED": "F1 Grenade",
+    "HATCHET.WEAPON": "Hatchet",
+    "HATCHET_STONE.WEAPON": "Stone Hatchet",
+    "HUNTING.WEAPON": "Hunting Bow",
+    "PICKAXE.WEAPON": "Pickaxe",
+    "REVOLVER.WEAPON": "Revolver",
+    "ROCK.WEAPON": "Rock",
+    "ROCKET_BASIC": "Rocket",
+    "SALVAGED_AXE.WEAPON": "Salvaged Axe",
+    "SALVAGED_HAMMER.WEAPON": "Salvaged Hammer",
+    "SALVAGED_ICEPICK.WEAPON": "Salvaged Icepick",
+    "SAWNOFFSHOTGUN.WEAPON": "Pump Shotgun",
+    "SEMI_PISTOL.WEAPON": "Semi-Automatic Pistol",
+    "SMG.WEAPON": "Custom SMG",
+    "STONE_PICKAXE.WEAPON": "Stone Pickaxe",
+    "STONE_SPEAR.WEAPON": "Stone Spear",
+    "SWORD.WEAPON": "Salvaged Sword",
+    "THOMPSON.WEAPON": "Thompson",
+    "TIMED.EXPLOSIVE.DEPLOYED": "Timed Explosive Charge",
+    "TORCH.WEAPON": "Torch",
+    "WATERPIPE.WEAPON": "Waterpipe Shotgun",
+    "WOODEN_SPEAR.WEAPON": "Wooden Spear"
+  }
+}

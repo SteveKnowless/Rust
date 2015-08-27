@@ -1,0 +1,32 @@
+{
+  "mod": {
+    "ConsoleFormatting": "{Title} {Name}: {Message}",
+    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
+    "NameColor": "lime",
+    "Permission": "color_mod",
+    "Rank": 2,
+    "TextColor": "white",
+    "Title": "[Mod]",
+    "TitleColor": "yellow"
+  },
+  "owner": {
+    "ConsoleFormatting": "{Title} {Name}: {Message}",
+    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
+    "NameColor": "lime",
+    "Permission": "color_owner",
+    "Rank": 3,
+    "TextColor": "white",
+    "Title": "[Agent]",
+    "TitleColor": "black"
+  },
+  "player": {
+    "ConsoleFormatting": "{Title} {Name}: {Message}",
+    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
+    "NameColor": "lime",
+    "Permission": "color_player",
+    "Rank": 1,
+    "TextColor": "white",
+    "Title": "[Player]",
+    "TitleColor": "lime"
+  }
+}

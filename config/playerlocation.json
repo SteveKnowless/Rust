@@ -1,0 +1,13 @@
+{
+  "Messages": {
+    "HelpText": "use /location or /loc to see your current location",
+    "Location": "Current location x: {x} y: {y} z: {z}"
+  },
+  "Settings": {
+    "ChatCommands": [
+      "loc",
+      "location"
+    ],
+    "Precision": "0"
+  }
+}

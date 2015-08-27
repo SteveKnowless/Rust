@@ -1,0 +1,50 @@
+{
+  "GUI": {
+    "activated": true,
+    "x max": "0.20",
+    "x min": "0.020",
+    "y max": "0.95",
+    "y min": "0.87"
+  },
+  "Messages": {
+    "cantRemove": "You are not allowed to remove this",
+    "helpAdmin": "/remove admin Optional:Time - To remove start removing anything",
+    "helpAll": "/remove all Optional:Time - To remove start removing an entire building",
+    "helpBasic": "/remove Optional:Time - To remove start removing",
+    "helpRay": "/rayremove - To remove the entire building that you are looking at",
+    "NoAccess": "You don't have the permissions to use this command",
+    "noBuildingFound": "Couldn't find any structure to remove",
+    "noFriend": "You must be friend with the building owner",
+    "noTargetFound": "Target player not found",
+    "noToolCupboard": "You need a Tool Cupboard to remove this",
+    "noToolCupboardAccess": "You need access to all Tool Cupboards around you to do this",
+    "tooFar": "You must get closer to remove this"
+  },
+  "permissions": {
+    "remove": "canRemove",
+    "removeAdmin": "canRemoveAdmin",
+    "removeAll": "canRemoveAll",
+    "removeGive": "canRemoveGive"
+  },
+  "Refund": {
+    "activated": true,
+    "all-grades": false,
+    "rate": 0.5
+  },
+  "Remove": {
+    "admin": 2,
+    "all": 2,
+    "basic": 0,
+    "target": 1
+  },
+  "RemoveTimer": {
+    "default": 30,
+    "max": 120
+  },
+  "RustIO": {
+    "activated": false
+  },
+  "ToolCupboard": {
+    "activated": true
+  }
+}

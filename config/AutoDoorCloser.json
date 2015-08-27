@@ -1,0 +1,10 @@
+{
+  "Default close time": 10.0,
+  "Max close time": 10.0,
+  "Min close time": 0.01,
+  "Number error": "Error! Incorrect number!",
+  "Succes msg": "Your doors will close automatically after {0} sec.",
+  "Succes off msg": "You turn off the automatic closing doors!!",
+  "Syntax error": "Error! Syntax: /ad [time|off]",
+  "Time error": "Error! Your time should be between {0} and {1}!"
+}
