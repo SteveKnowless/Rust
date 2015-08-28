@@ -15,7 +15,7 @@
     "pollTimer": 1.5,
     "requiredVotesPercentage": 0.6,
     "sunriseHour": 7,
-    "sunsetHour": 18
+    "sunsetHour": 17.5
   },
   "Version": "1.1.0"
 }
