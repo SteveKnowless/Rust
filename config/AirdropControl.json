@@ -1,19 +1,19 @@
 {
   "Airdrop": {
-    "Speed": 40.0
+    "Speed": 50.0
   },
   "Drop": {
     "MaxCrates": 3,
-    "MaxDropCratesInterval": 10,
+    "MaxDropCratesInterval": 15,
     "MaxX": 1500,
-    "MaxY": 300.0,
+    "MaxY": 250.0,
     "MaxZ": 1500,
     "MinCrates": 1,
-    "MinDropCratesInterval": 3,
+    "MinDropCratesInterval": 5,
     "MinX": -1500,
-    "MinY": 200.0,
+    "MinY": 150.0,
     "MinZ": -1500,
-    "ShowDropLocation": true
+    "ShowDropLocation": false
   },
   "Messages": {
     "Inbound": "Airdrop incoming! Dropping at {0} {1} {2}"
