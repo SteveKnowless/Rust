@@ -7,8 +7,8 @@
   },
   "Homes": {
     "CheckFoundationForOwner": true,
-    "Cooldown": 300,
-    "Countdown": 30,
+    "Cooldown": 180,
+    "Countdown": 15,
     "DailyLimit": 100,
     "ForceOnTopOfFoundation": true,
     "HomesLimit": 3,
@@ -207,9 +207,9 @@
   },
   "TPR": {
     "BlockTPAOnCeiling": true,
-    "Cooldown": 300,
+    "Cooldown": 285,
     "Countdown": 15,
     "DailyLimit": 100,
-    "RequestDuration": 30
+    "RequestDuration": 60
   }
 }
