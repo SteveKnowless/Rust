@@ -132,7 +132,7 @@
     ]
   },
   "SETTINGS": {
-    "ADVERTS INTERVAL": 6,
+    "ADVERTS INTERVAL": 7.5,
     "BROADCAST TO CONSOLE": true,
     "ENABLE ADMINS LIST": false,
     "ENABLE ADVERTS": true,
@@ -157,6 +157,6 @@
     "<size=17>Welcome {username}</size>",
     "<orange><size=20>•</size><end> Type <orange>/help<end> for all available commands.",
     "<orange><size=20>•</size><end> Check our server <orange>/rules<end>.",
-    "<orange><size=20>•</size><end> See where you are on the server map at: <lime>http://gameserver-25u.cloudapp.net:28015<end>"
+    "<orange><size=20>•</size><end> See where you are on the server map at: <lime>http://map.playrust.io/?104.46.99.115:28015<end>"
   ]
 }
