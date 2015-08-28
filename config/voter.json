@@ -26,24 +26,24 @@
       {
         "price": 2,
         "reward": {
-          "pistol_semiauto": 1,
-          "ammo_pistol": 24,
-          "attire_hide_boots": 1,
-          "attire_hide_pants": 1,
-          "hat_wolf": 1
+          "pistol.semiauto": 1,
+          "ammo.pistol": 24,
+          "attire.hide.boots": 1,
+          "attire.hide.pants": 1,
+          "hat.wolf": 1
         }
       },
       {
         "price": 4,
         "reward": {
-          "rifle_ak": 1,
-          "ammo_rifle": 36
+          "rifle.ak": 1,
+          "ammo.rifle": 36
         }
       },
       {
         "price": 7,
         "reward": {
-          "supply_signal": 1
+          "supply.signal": 1
         }
       }
     ],
