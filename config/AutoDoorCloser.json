@@ -1,5 +1,5 @@
 {
-  "Default close time": 10.0,
+  "Default close time": 7.0,
   "Max close time": 10.0,
   "Min close time": 0.01,
   "Number error": "Error! Incorrect number!",
