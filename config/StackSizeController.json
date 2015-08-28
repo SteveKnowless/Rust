@@ -95,9 +95,9 @@
   "Hazmat Jacket": 1,
   "Hazmat Pants": 1,
   "Hide Boots": 1,
-  "Hide Pants": 2,
-  "Hide Poncho": 3,
-  "Hide Vest": 3,
+  "Hide Pants": 1,
+  "Hide Poncho": 1,
+  "Hide Vest": 1,
   "High External Stone Wall": 10,
   "High External Wall": 1,
   "High External Wooden Wall": 10,
@@ -135,7 +135,7 @@
   "Metal Chest Plate": 2,
   "Metal Facemask": 2,
   "Metal Fragments": 65500,
-  "Metal Ore": 9999,
+  "Metal Ore": 10000,
   "Miners Hat": 1,
   "Mining Quarry": 1,
   "Multicam Jacket": 1,
@@ -204,7 +204,7 @@
   "Wind Turbine": 1,
   "Wolf Headdress": 1,
   "Wolf Skull": 1,
-  "Wood": 99999,
+  "Wood": 65500,
   "Wood Armor Pants": 1,
   "Wood Chestplate": 1,
   "Wood Storage Box": 5,
@@ -213,5 +213,5 @@
   "Wooden Floor Spikes": 7,
   "Wooden Ladder": 2,
   "Wooden Sign": 7,
-  "Yellow Longsleeve T-Shirt": 2
+  "Yellow Longsleeve T-Shirt": 1
 }
