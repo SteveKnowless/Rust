@@ -12,10 +12,10 @@
   "Settings": {
     "displayVoteProgress": false,
     "pollRetryTime": 8.0,
-    "pollTimer": 1.5,
+    "pollTimer": 1,
     "requiredVotesPercentage": 0.6,
     "sunriseHour": 7,
-    "sunsetHour": 17.5
+    "sunsetHour": 17
   },
   "Version": "1.1.0"
 }
