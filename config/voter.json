@@ -50,13 +50,13 @@
     "RewardsCommand": "rewards",
     "Trackers": {
       "[Rust-ServerList]": {
-        "ID": "49073",
-        "Key": "cjq9anuuojwdo2jkd32puhei5kotyo4vhew",
+        "ID": "",
+        "Key": "",
         "PointsForVote": 1
       },
       "[Rust-Servers]": {
-        "ID": "",
-        "Key": "",
+        "ID": "49073",
+        "Key": "cjq9anuuojwdo2jkd32puhei5kotyo4vhew",
         "PointsForVote": 1
       },
       "[TopRustServers]": {
