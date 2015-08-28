@@ -6,16 +6,16 @@
     "voteOpenTime": "Night time skip vote is now open for {0} minute(s).",
     "voteSuccessful": "Vote was successful, it will be daytime soon.",
     "voteFailed": "Vote failed, not enough players voted to skip night time.",
-    "voteReOpenTime": "Vote will re-open in {0} minute(s).",
+    "voteReOpenTime": "Vote will re-open once more before sunrise.",
     "voteNow": "Type <color=#FF2211>/voteday</color> now to skip night time."
   },
   "Settings": {
     "displayVoteProgress": false,
-    "pollRetryTime": 5.0,
-    "pollTimer": 2.5,
+    "pollRetryTime": 8.0,
+    "pollTimer": 1.5,
     "requiredVotesPercentage": 0.6,
     "sunriseHour": 7,
-    "sunsetHour": 19
+    "sunsetHour": 18
   },
   "Version": "1.1.0"
 }
