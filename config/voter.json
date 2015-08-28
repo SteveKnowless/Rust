@@ -24,25 +24,26 @@
     "DataFile": "VoterData",
     "Rewards": [
       {
-        "price": 3,
+        "price": 2,
         "reward": {
-          "bow_hunting": 2,
-          "burlap_shoes": 1,
-          "burlap_shoes_bp": 1
+          "pistol.semiauto": 1,
+          "ammo.pistol": 24,
+          "attire.hide.boots": 1,
+          "attire.hide.pants": 1,
+          "hat.wolf": 1
         }
       },
       {
         "price": 4,
         "reward": {
-          "Money": 50,
-          "shotgun_waterpipe": 2
+          "rifle.ak": 1,
+          "ammo.rifle": 36
         }
       },
       {
-        "price": 5,
+        "price": 7,
         "reward": {
-          "Money": 400,
-          "smg_thompson": 1
+          "supply.signal": 1
         }
       }
     ],
