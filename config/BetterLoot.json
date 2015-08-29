@@ -41,7 +41,7 @@
     "chocholate": 5,
     "smallwaterbottle": 5
   },
-  "dropWeaponsWithAmmo": false,
+  "dropWeaponsWithAmmo": true,
   "enforceBlacklist": false,
   "itemBlacklist": [],
   "maxItemsPerBarrel": 3,
