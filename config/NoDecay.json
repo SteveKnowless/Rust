@@ -3,13 +3,13 @@
     "outputToRcon": false
   },
   "Mutipliers": {
-    "armoredMultiplier": 0.3,
+    "armoredMultiplier": 0,
     "campfireMultiplier": 0.0,
-    "highStoneWallMultiplier": 1.0,
-    "highWoodWallMultiplier": 1.0,
-    "sheetMultiplier": 0.5,
-    "stoneMultiplier": 0.5,
+    "highStoneWallMultiplier": 0,
+    "highWoodWallMultiplier": 0,
+    "sheetMultiplier": 0,
+    "stoneMultiplier": 0,
     "twigMultiplier": 1.0,
-    "woodMultiplier": 0.7
+    "woodMultiplier": 0.5
   }
 }
