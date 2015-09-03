@@ -11,7 +11,7 @@
     "COLORS": {
         "ADVERTS": "white",
         "BOARDS TITLE": "white",
-        "JOIN MESSAGE": "D79E06",
+        "JOIN MESSAGE": "#D79E06",
         "LEAVE MESSAGE": "silver",
         "PREFIX": "#00EEEE",
         "SYSTEM": "white",
