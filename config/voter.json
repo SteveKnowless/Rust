@@ -24,24 +24,21 @@
     "DataFile": "VoterData",
     "Rewards": [
       {
-        "price": 2,
+        "price": 1,
         "reward": {
           "pistol.semiauto": 1,
-          "ammo.pistol": 24,
-          "attire.hide.boots": 1,
-          "attire.hide.pants": 1,
-          "hat.wolf": 1
+          "ammo.pistol": 24
         }
       },
       {
-        "price": 4,
+        "price": 2,
         "reward": {
           "rifle.ak": 1,
           "ammo.rifle": 36
         }
       },
       {
-        "price": 7,
+        "price": 3,
         "reward": {
           "supply.signal": 1
         }
