@@ -19,21 +19,21 @@
     "Title": "ᵠ҉OverLord҉ᵠ",
     "TitleColor": "black"
   },
-  "ProVeteran": {
+  "proveteran": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
     "NameColor": "#8B0000",
-    "Permission": "color_owner",
+    "Permission": "color_proveteran",
     "Rank": 1,
     "TextColor": "white",
     "Title": "ΞHunterΞ",
     "TitleColor": "#8B0000"
   },
-  "Veteran": {
+  "veteran": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
     "NameColor": "#C0C0C0",
-    "Permission": "color_owner",
+    "Permission": "color_veteran",
     "Rank": 1,
     "TextColor": "white",
     "Title": "ΞScavengerΞ",
