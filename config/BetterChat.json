@@ -15,9 +15,19 @@
     "NameColor": "#ba0000",
     "Permission": "color_owner",
     "Rank": 3,
-    "TextColor": "#C0C0C0",
+    "TextColor": "silver",
     "Title": "<OverLord>",
     "TitleColor": "black"
+  },
+  "donator": {
+    "ConsoleFormatting": "{Title} {Name}: {Message}",
+    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
+    "NameColor": "#FF0000",
+    "Permission": "color_donator",
+    "Rank": 1,
+    "TextColor": "white",
+    "Title": "∞Donator∞",
+    "TitleColor": "#FF0000"
   },
   "proveteran": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
