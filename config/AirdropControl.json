@@ -3,7 +3,7 @@
     "Speed": 65.0
   },
   "Drop": {
-    "MaxCrates": 5,
+    "MaxCrates": 3,
     "MaxDropCratesInterval": 100,
     "MaxX": 1500,
     "MaxY": 250.0,
