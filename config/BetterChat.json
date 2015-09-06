@@ -2,22 +2,42 @@
   "mod": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "lime",
+    "NameColor": "#FFC125",
     "Permission": "color_mod",
     "Rank": 2,
     "TextColor": "white",
-    "Title": "[Mod]",
-    "TitleColor": "yellow"
+    "Title": "₪Diplomat₪",
+    "TitleColor": "#FFC125"
   },
   "owner": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "lime",
+    "NameColor": "#ba0000",
     "Permission": "color_owner",
     "Rank": 3,
-    "TextColor": "white",
-    "Title": "[Agent]",
+    "TextColor": "#C0C0C0",
+    "Title": "ᵠ҉OverLord҉ᵠ",
     "TitleColor": "black"
+  },
+  "ProVeteran": {
+    "ConsoleFormatting": "{Title} {Name}: {Message}",
+    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
+    "NameColor": "#8B0000",
+    "Permission": "color_owner",
+    "Rank": 1,
+    "TextColor": "white",
+    "Title": "ΞHunterΞ",
+    "TitleColor": "#8B0000"
+  },
+  "Veteran": {
+    "ConsoleFormatting": "{Title} {Name}: {Message}",
+    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
+    "NameColor": "#C0C0C0",
+    "Permission": "color_owner",
+    "Rank": 1,
+    "TextColor": "white",
+    "Title": "ΞScavengerΞ",
+    "TitleColor": "#C0C0C0"
   },
   "player": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
@@ -26,7 +46,7 @@
     "Permission": "color_player",
     "Rank": 1,
     "TextColor": "white",
-    "Title": "[Refugee]",
+    "Title": "ΞRefugeeΞ",
     "TitleColor": "lime"
   }
 }
