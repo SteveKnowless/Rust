@@ -6,7 +6,7 @@
     "voteOpenTime": "Night time skip vote is now open for {0} minute(s).",
     "voteSuccessful": "Vote was successful, it will be daytime soon.",
     "voteFailed": "Vote failed, not enough players voted to skip night time.",
-    "voteReOpenTime": "Vote will re-open in {0} minute(s).",
+    "voteReOpenTime": "51% of the population must vote to skip night",
     "voteNow": "Type <color=#FF2211>/voteday</color> now to skip night time."
   },
   "Settings": {
