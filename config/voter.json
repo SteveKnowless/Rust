@@ -26,21 +26,31 @@
       {
         "price": 1,
         "reward": {
-          "pistol.semiauto": 1,
-          "ammo.pistol": 24
+          "ammo": {
+            "pistol": 24
+          },
+          "pistol": {
+            "semiauto": 1
+          }
         }
       },
       {
         "price": 2,
         "reward": {
-          "rifle.ak": 1,
-          "ammo.rifle": 36
+          "ammo": {
+            "rifle": 36
+          },
+          "rifle": {
+            "ak": 1
+          }
         }
       },
       {
         "price": 3,
         "reward": {
-          "supply.signal": 1
+          "supply": {
+            "signal": 1
+          }
         }
       }
     ],

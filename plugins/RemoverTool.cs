@@ -9,7 +9,7 @@ using Oxide.Core.Plugins;
 
 namespace Oxide.Plugins
 {
-    [Info("RemoverTool", "Reneb & Mughisi & Cryptoc", "2.2.18", ResourceId = 651)]
+    [Info("RemoverTool", "Reneb & Mughisi & Cryptoc & SPooCK", "2.2.20", ResourceId = 651)]
     class RemoverTool : RustPlugin
     {
     	private static DateTime epoch;
@@ -232,39 +232,49 @@ namespace Oxide.Plugins
             Config.Clear();
             LoadVariables();
         }
+        private List<UnityEngine.Collider> wasKilled;
+        private List<Vector3> checkFrom = new List<Vector3>();
+        private int current;
+
         void RemoveAllFrom(Vector3 sourcepos)
         {
-            List<Vector3> checkFrom = new List<Vector3>();
-            List<UnityEngine.Collider> wasKilled = new List<UnityEngine.Collider>();
-            checkFrom.Add(sourcepos);
-            var current = 0;
-            while (true)
+            if (current >= checkFrom.Count)
             {
-                current++;
-                if (current > checkFrom.Count)
-                    break;
-                var hits = UnityEngine.Physics.OverlapSphere(checkFrom[current - 1], 3f);
-                foreach (var hit in hits)
+                current = 0;
+                checkFrom = new List<Vector3>();
+                wasKilled = new List<UnityEngine.Collider>();
+            }
+            checkFrom.Add(sourcepos);
+            DelayRemove();
+        }
+
+        void DelayRemove()
+        {
+            if (current >= checkFrom.Count) { return; }
+            current++;
+            var hits = UnityEngine.Physics.OverlapSphere(checkFrom[current - 1], 3f);
+            foreach (var hit in hits)
+            {
+                if (!(wasKilled.Contains(hit)))
                 {
-                    if (!(wasKilled.Contains(hit)))
+                    wasKilled.Add(hit);
+                    if (hit.GetComponentInParent<BuildingBlock>() != null)
                     {
-                        wasKilled.Add(hit);
-                        if (hit.GetComponentInParent<BuildingBlock>() != null)
-                        {
-                            BuildingBlock fbuildingblock = hit.GetComponentInParent<BuildingBlock>();
-                            checkFrom.Add(fbuildingblock.transform.position);
-                            if (!fbuildingblock.isDestroyed)
-                                fbuildingblock.KillMessage();
-                        } 
-                        else if (hit.GetComponentInParent<BasePlayer>() == null && hit.GetComponentInParent<BaseEntity>() != null)
-                        {
-                            if(!(hit.GetComponentInParent<BaseEntity>().isDestroyed))
-                                hit.GetComponentInParent<BaseEntity>().KillMessage();
-                        }
+                        BuildingBlock fbuildingblock = hit.GetComponentInParent<BuildingBlock>();
+                        checkFrom.Add(fbuildingblock.transform.position);
+                        if (!fbuildingblock.isDestroyed)
+                            fbuildingblock.KillMessage();
+                    }
+                    else if (hit.GetComponentInParent<BasePlayer>() == null && hit.GetComponentInParent<BaseEntity>() != null)
+                    {
+                        if (!(hit.GetComponentInParent<BaseEntity>().isDestroyed))
+                            hit.GetComponentInParent<BaseEntity>().KillMessage();
                     }
                 }
             }
+            timer.Once(0.001f, () => DelayRemove());
         }
+
         void Refund(BasePlayer player, BaseEntity entity)
         {
             if (entity as WorldItem)
@@ -473,6 +483,10 @@ namespace Oxide.Plugins
                 SendReply(player, "Remover Tool: Deactivated");
                 DestroyGui(player);
             }
+        }
+        bool isRemoving(BasePlayer player)
+        {
+            return removing.ContainsKey(player);
         }
         void TriggerRemove(BasePlayer player, string[] args, string ttype)
         {

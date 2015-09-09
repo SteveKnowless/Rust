@@ -2,6 +2,7 @@ import re
 import time
 import BasePlayer
 import ConVar.Server as sv
+import TOD_Sky
 import UnityEngine.Random as random
 from System import Action, Int32, String
 
@@ -15,7 +16,7 @@ class notifier:
     def __init__(self):
 
         self.Title = 'Notifier'
-        self.Version = V(2, 11, 1)
+        self.Version = V(2, 12, 0)
         self.Author = 'SkinN'
         self.Description = 'Broadcasts chat messages as notifications and advertising.'
         self.ResourceId = 797
@@ -46,7 +47,7 @@ class notifier:
                 'ENABLE ADMINS LIST': False,
                 'ENABLE PLUGINS LIST': False,
                 'ENABLE RULES': True,
-                'ENABLE MAP LINK': True,
+                'ENABLE MAP LINK': False,
                 'ENABLE ADVERTS COMMAND': True
             },
             'MESSAGES': {
@@ -73,7 +74,7 @@ class notifier:
                 'RULES DESC': '<orange>/rules<end> <grey>-<end> List of server rules.',
                 'MAP LINK DESC': '<orange>/map<end> <grey>-<end> Server map url.',
                 'ADVERTS DESC': '<orange>/adverts<end> <grey>-<end> Allows <cyan>Admins<end> to change the adverts interval ( i.g: /adverts 5 )',
-                'PLAYERS ONLINE DESC': '<orange>/online<end> <grey>-<end> Shows the number of players and <cyan>Admins<end> online, plus a few server stats.'
+                'PLAYERS ONLINE DESC': '<orange>/online<end> <grey>-<end> Shows the number of players and <cyan>Admins<end> online, plus a few server stats.',
             },
             'WELCOME MESSAGE': (
                 '<size=17>Welcome {username}</size>',
@@ -88,7 +89,9 @@ class notifier:
                 '<red>Cheat is strictly prohibited.<end>',
                 'Type <orange>/map<end> for the server map link.',
                 'You are playing on: <lime>{server.hostname}<end>',
-                '<orange>Players Online: <lime>{players}<end> / <lime>{server.maxplayers}<end> Sleepers: <lime>{sleepers}<end><end>'
+                '<orange>Players Online: <lime>{players}<end> / <lime>{server.maxplayers}<end> Sleepers: <lime>{sleepers}<end><end>',
+                'The game time is <lime>{gametime}<end>',
+                'The server time and date is <lime>{localdate} {localtime}<end>'
             ),
             'COLORS': {
                 'PREFIX': '#00EEEE',
@@ -106,7 +109,7 @@ class notifier:
                 'ADMINS LIST': 'admins',
                 'PLAYERS ONLINE': 'online',
                 'MAP LINK': 'map',
-                'ADVERTS COMMAND': 'adverts'
+                'ADVERTS COMMAND': 'adverts',
             },
             'RULES': {
                 'EN': (
@@ -363,7 +366,7 @@ class notifier:
     def Unload(self):
         ''' Hook called on plugin unload '''
 
-        # Destroy adverts loop
+        # Destroy adverts {loop}
         if self.adverts_loop: self.adverts_loop.Destroy()
 
     # -------------------------------------------------------------------------
@@ -579,7 +582,7 @@ class notifier:
 
         if args and args[0] == 'help':
 
-            self.tell(player, '%s COMMANDS DESCRIPTION:', f=False)
+            self.tell(player, '%sCOMMANDS DESCRIPTION:' % ('%s | ' % self.prefix if self.prefix else ''), f=False)
             self.tell(player, LINE, f=False)
 
             for cmd in CMDS:
@@ -736,7 +739,7 @@ class notifier:
 
                         self.con('No lines found on Welcome Message, turning it off')
 
-        if player:
+        if player.net and player.net.connection:
 
             pip = player.net.connection.ipaddress.split(':')[0]
             webrequests.EnqueueGet('http://ipinfo.io/%s/country' % pip, Action[Int32,String](response_handler), self.Plugin)
@@ -757,11 +760,20 @@ class notifier:
 
                 self.lastadvert = index
 
-            self.say(ADVERTS[index].format(
-                players= len(self.activelist()),
-                sleepers=len(self.sleeperlist()),
-                server=sv),
-            COLOR['ADVERTS'])
+            try:
+
+                self.say(ADVERTS[index].format(
+                    players= len(self.activelist()),
+                    sleepers=len(self.sleeperlist()),
+                    localtime=time.strftime('%H:%M %p'),
+                    localdate=time.strftime('%m/%d/%Y'),
+                    gametime=' '.join(str(TOD_Sky.Instance.Cycle.DateTime).split(' ')[1:]),
+                    server=sv),
+                COLOR['ADVERTS'])
+
+            except:
+
+                self.con('[ERROR] Unknown name format on advert message! (Message: %s)' % ADVERTS[index])
 
         else:
 

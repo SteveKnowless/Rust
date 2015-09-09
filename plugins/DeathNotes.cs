@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Death Notes", "LaserHydra (Original by SkinN)", "3.1.23", ResourceId = 819)]
+    [Info("Death Notes", "LaserHydra (Original by SkinN)", "3.1.31", ResourceId = 819)]
     [Description("Broadcasts players/animals deaths to chat")]
     class DeathNotes : RustPlugin
     {
@@ -29,10 +29,10 @@ namespace Oxide.Plugins
 			
 			prefix = "<color=" + Config["Colors", "Prefix"].ToString() + ">" + Config["Settings", "Prefix"].ToString() + "</color>";
 			if((bool)Config["Settings", "EnablePluginIcon"]) profile = "76561198206240711";
-			metabolism = "Drowned Heat Cold Thirst Poision Hunger Radiation Bleeding Fall Generic".Split(' ').ToList();
+			metabolism = "Drowned Heat Cold Thirst Poison Hunger Radiation Bleeding Fall Generic".Split(' ').ToList();
 			playerDamageTypes = "Slash Blunt Stab Bullet".Split(' ').ToList();
 			barricadeDamageTypes = "Slash Stab".Split(' ').ToList();
-			traps = "Landmine Beartrap Floor_spikes".Split(' ').ToList();
+			traps = "Landmine.prefab Beartrap.prefab Floor_spikes.prefab".Split(' ').ToList();
         }
 
         protected override void LoadDefaultConfig()
@@ -103,15 +103,12 @@ namespace Oxide.Plugins
         void OnEntityDeath(BaseCombatEntity vic, HitInfo hitInfo)
         {					
 			if(hitInfo == null) return;
-			string victimstring = "None";
-			string killerstring = "None";
-			string weapon = "";
 			
+			string weapon = "";
 			string msg = null;
 			
 			string dmg = FirstUpper(vic.lastDamage.ToString());
 			if(dmg == null || dmg == "") dmg = "None";
-
 
 			string bodypart = GetFormattedBodypart(StringPool.Get(hitInfo.HitBone), true);
 			if(bodypart == null || bodypart == "") bodypart = "None";
@@ -147,7 +144,7 @@ namespace Oxide.Plugins
 			try
 			{
 				if(!vic.ToString().Contains("corpse"))
-				{			
+				{	
 					if(vic != null)
 					{
 						if(vic.ToPlayer() != null)
@@ -245,10 +242,10 @@ namespace Oxide.Plugins
 				
 				if(hitInfo.Initiator != null)
 				{
-					if(hitInfo.Initiator.ToPlayer() == null) deathmsg = deathmsg.Replace("{attacker}", formattedAnimal);
+					if(msg == "Bite") deathmsg = deathmsg.Replace("{attacker}", formattedAnimal);
 					else deathmsg = deathmsg.Replace("{attacker}", formattedAttacker);
 					
-					if(hitInfo.Initiator.ToPlayer() == null) rawmsg = rawmsg.Replace("{attacker}", rawAnimal);
+					if(msg == "Bite") rawmsg = rawmsg.Replace("{attacker}", rawAnimal);
 					else rawmsg = rawmsg.Replace("{attacker}", rawAttacker);
 				}
 
@@ -287,8 +284,7 @@ namespace Oxide.Plugins
 				
 				try
 				{
-					AddNewToConfig(rawBodypart, weapon);
-
+					if(msg != "AnimalDeath") AddNewToConfig(rawBodypart, weapon);
 					BroadcastDeath(prefix + " " + GetFormattedMessage(deathmsg), rawmsg, vic);
 				}
 				catch (Exception ex)
@@ -317,7 +313,7 @@ namespace Oxide.Plugins
 			attacker = attacker.Replace("Beartrap", "Bear Trap");
 			attacker = attacker.Replace("Floor_spikes", "Floor Spike Trap");
 			attacker = attacker.Replace("Barricade.woodwire", "Wired Wooden Barricade");
-			attacker = attacker.Replace("Wall.external.high.wood.prefab", "High External Wooden Wall");
+			attacker = attacker.Replace("Wall.external.high.wood", "High External Wooden Wall");
 			attacker = attacker.Replace("Barricade.wood", "Wooden Barricade");
 			attacker = attacker.Replace("Barricade.metal", "Metal Barricade");
 			if(!raw) attacker = "<color=" + Config["Colors", "Attacker"].ToString() + ">" + attacker + "</color>";
