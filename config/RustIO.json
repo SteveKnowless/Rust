@@ -7,10 +7,10 @@
   "displayMonuments": true,
   "displayMortality": true,
   "enableLocationSharing": true,
-  "helpMessage": "To locate yourself on the LIVEMAP, browse to <color=#CC3A2D>http://playrust.io</color> and type in this server's name!",
+  "helpMessage": "To locate yourself on the LIVEMAP, visit <color=#CC3A2D>http://playrust.io</color> and type in this server's name!",
   "hideSpecificMonuments": [
     "cave",
     "mountain"
   ],
-  "welcomeMessage": "To locate yourself on the LIVEMAP, browse to <color=#CC3A2D>http://playrust.io</color> and type in this server's name!"
+  "welcomeMessage": "To locate yourself on the LIVEMAP, visit <color=#CC3A2D>http://playrust.io</color> and type in this server's name!"
 }
