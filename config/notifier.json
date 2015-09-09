@@ -158,7 +158,7 @@
         "HIDE ADMINS": true,
         "PLAYERS LIST ON CHAT": true,
         "PLAYERS LIST ON CONSOLE": true,
-        "PREFIX": "NOTIFIER",
+        "PREFIX": "RealRust",
         "RULES LANGUAGE": "AUTO"
     },
     "WELCOME MESSAGE": [
