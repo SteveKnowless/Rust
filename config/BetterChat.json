@@ -42,12 +42,12 @@
   "veteran": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "#C0C0C0",
+    "NameColor": "#c16161",
     "Permission": "color_veteran",
     "Rank": 1,
     "TextColor": "white",
     "Title": "ΞScavengerΞ",
-    "TitleColor": "#C0C0C0"
+    "TitleColor": "#c16161"
   },
   "player": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
