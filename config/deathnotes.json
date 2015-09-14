@@ -23,7 +23,9 @@
   },
   "Bodyparts": {
     "": "",
+    "Base": "Base",
     "Calf": "Calf",
+    "Chickenrootbone": "Chickenrootbone",
     "Clavicle": "Clavicle",
     "Ear": "Ear",
     "Earend": "Earend",

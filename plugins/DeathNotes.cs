@@ -1,33 +1,67 @@
-﻿using System.Collections.Generic;
+﻿using System.Text.RegularExpressions;
+using System.Collections.Generic;
 using System.Reflection;
 using System;
 using System.Data;
 using UnityEngine;
 using Oxide.Core;
+using Oxide.Core.Plugins;
+using Oxide.Core.Libraries;
 using ProtoBuf;
 using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Death Notes", "LaserHydra", "3.1.41", ResourceId = 819)]
+    [Info("Death Notes", "LaserHydra", "3.3.3", ResourceId = 819)]
     [Description("Broadcasts players/animals deaths to chat")]
     class DeathNotes : RustPlugin
     {
 		#region Settings
+		bool debugging = false;
 		string prefix = "";
 		string profile = "0";
 		List<string> metabolism = new List<string>();
 		List<string> playerDamageTypes = new List<string>();
 		List<string> barricadeDamageTypes = new List<string>();
 		List<string> traps = new List<string>();
+		
+		[PluginReference]
+        Plugin PopupNotifications;
+		
+		private readonly WebRequests webRequests = Interface.GetMod().GetLibrary<WebRequests>("WebRequests");
+		#endregion
+		
+		#region Commands
+		//	Toggle Debug-Mode
+		[ConsoleCommand("deathnotes.debug")]
+		void ToggleDebug(ConsoleSystem.Arg arg)
+		{
+			if(arg?.connection?.authLevel < 2) return;
+			if(debugging) debugging = false;
+			else debugging = true;
+		}
+		
+		//	Info Commands
+		[ChatCommand("deathnotes")]
+		void DeathnotesInfo(BasePlayer player, string cmd, string[] args)
+		{
+			ShowInfo(player);
+		}
 		#endregion
 		
 		#region Hooks
         void Loaded()
         {
+			if(!permission.PermissionExists("deathnotes.debug")) permission.RegisterPermission("deathnotes.debug", this);
+			
             LoadDefaultConfig();
 			
-			prefix = "<color=" + Config["Colors", "Prefix"].ToString() + ">" + Config["Settings", "Prefix"].ToString() + "</color>";
+			if(!PopupNotifications)
+			{
+				Puts("Popup Notifications can only be used if PopupNotifications is installed! Get it here: http://oxidemod.org/plugins/popup-notifications.1252/");
+			}
+			
+			prefix = "<color=" + Config["Colors", "Prefix"].ToString() + ">" + Config["Settings", "Prefix"].ToString() + "</color> ";
 			if((bool)Config["Settings", "EnablePluginIcon"]) profile = "76561198206240711";
 			metabolism = "Drowned Heat Cold Thirst Poison Hunger Radiation Bleeding Fall Generic".Split(' ').ToList();
 			playerDamageTypes = "Slash Blunt Stab Bullet".Split(' ').ToList();
@@ -40,6 +74,7 @@ namespace Oxide.Plugins
             //  Settings
             StringConfig("Settings", "Prefix", "DEATH NOTES<color=white>:</color>");
             BoolConfig("Settings", "BroadcastToConsole", true);
+			BoolConfig("Settings", "UsePopupNotifications", false);
             BoolConfig("Settings", "ShowSuicides", true);
             BoolConfig("Settings", "ShowMetabolismDeaths", true);
             BoolConfig("Settings", "ShowExplosionDeaths", true);
@@ -71,188 +106,253 @@ namespace Oxide.Plugins
             StringConfig("Colors", "Distance", "#4B75FF");
 
             //  Messages
-            StringConfig("Messages", "Radiation", "{victim} did not know that radiation kills.");
-            StringConfig("Messages", "Hunger", "{victim} starved to death.");
-            StringConfig("Messages", "Thirst", "{victim} died dehydrated.");
-            StringConfig("Messages", "Drowned", "{victim} thought he could swim.");
-            StringConfig("Messages", "Cold", "{victim} froze to death.");
-            StringConfig("Messages", "Heat", "{victim} burned to death.");
-            StringConfig("Messages", "Fall", "{victim} fell to his death.");
-            StringConfig("Messages", "Bleeding", "{victim} bled to death.");
-            StringConfig("Messages", "Explosion", "{victim} got blown up.");
-            StringConfig("Messages", "Poision", "{victim} died poisoned.");
-            StringConfig("Messages", "Suicide", "{victim} committed suicide.");
-            StringConfig("Messages", "Generic", "{victim} died.");
-            StringConfig("Messages", "Trap", "{victim} stepped on a {attacker}.");
-            StringConfig("Messages", "Barricade", "{victim} died stuck on a {attacker}.");
-            StringConfig("Messages", "Stab", "{attacker} stabbed {victim} to death with a {weapon} and hit the {bodypart}.");
-            StringConfig("Messages", "StabSleep", "{attacker} stabbed {victim}, while he slept.");
-            StringConfig("Messages", "Slash", "{attacker} sliced {victim} into pieces with a {weapon} and hit the {bodypart}.");
-            StringConfig("Messages", "SlashSleep", "{attacker} stabbed {victim}, while he slept.");
-            StringConfig("Messages", "Blunt", "{attacker} killed {victim} with a {weapon} and hit the {bodypart}.");
-            StringConfig("Messages", "BluntSleep", "{attacker} killed {victim} with a {weapon}, while he slept.");
-            StringConfig("Messages", "Bullet", "{attacker} killed {victim} with a {weapon}, hitting the {bodypart} from {distance}m.");
-            StringConfig("Messages", "BulletSleep", "{attacker} killed {victim}, while sleeping. (In the {bodypart} with a {weapon}, from {distance}m)");
-            StringConfig("Messages", "Arrow", "{attacker} killed {victim} with an arrow at {distance}m, hitting the {bodypart}.");
-            StringConfig("Messages", "ArrowSleep", "{attacker} killed {victim} with an arrow from {distance}m, while he slept.");
-            StringConfig("Messages", "Bite", "A {attacker} killed {victim}.");
-            StringConfig("Messages", "BiteSleep", "A {attacker} killed {victim}, while he slept.");
-            StringConfig("Messages", "AnimalDeath", "{attacker} killed a {victim} with a {weapon} from {distance}m.");
+			MessageConfig("Radiation", new List<string>{"{victim} did not know that radiation kills."});
+            MessageConfig("Hunger", new List<string>{"{victim} starved to death."});
+            MessageConfig("Thirst", new List<string>{"{victim} died dehydrated."});
+            MessageConfig("Drowned", new List<string>{"{victim} thought he could swim."});
+            MessageConfig("Cold", new List<string>{"{victim} froze to death."});
+            MessageConfig("Heat", new List<string>{"{victim} burned to death."});
+            MessageConfig("Fall", new List<string>{"{victim} fell to his death."});
+            MessageConfig("Bleeding", new List<string>{"{victim} bled to death."});
+            MessageConfig("Explosion", new List<string>{"{victim} got blown up."});
+            MessageConfig("Poision", new List<string>{"{victim} died by poison."});
+            MessageConfig("Suicide", new List<string>{"{victim} committed suicide."});
+            MessageConfig("Generic", new List<string>{"{victim} died."});
+			MessageConfig("Unknown", new List<string>{"{victim} died by an unknown reason."});
+            MessageConfig("Trap", new List<string>{"{victim} stepped on a {attacker}."});
+            MessageConfig("Barricade", new List<string>{"{victim} died stuck on a {attacker}."});
+            MessageConfig("Stab", new List<string>{"{attacker} stabbed {victim} to death with a {weapon} and hit the {bodypart}."});
+            MessageConfig("StabSleep", new List<string>{"{attacker} stabbed {victim}, while he slept."});
+            MessageConfig("Slash", new List<string>{"{attacker} sliced {victim} into pieces with a {weapon} and hit the {bodypart}."});
+            MessageConfig("SlashSleep", new List<string>{"{attacker} stabbed {victim}, while he slept."});
+            MessageConfig("Blunt", new List<string>{"{attacker} killed {victim} with a {weapon} and hit the {bodypart}."});
+            MessageConfig("BluntSleep", new List<string>{"{attacker} killed {victim} with a {weapon}, while he slept."});
+            MessageConfig("Bullet", new List<string>{"{attacker} killed {victim} with a {weapon}, hitting the {bodypart} from {distance}m."});
+            MessageConfig("BulletSleep", new List<string>{"{attacker} killed {victim}, while sleeping. (In the {bodypart} with a {weapon}, from {distance}m)"});
+            MessageConfig("Arrow", new List<string>{"{attacker} killed {victim} with an arrow at {distance}m, hitting the {bodypart}."});
+            MessageConfig("ArrowSleep", new List<string>{"{attacker} killed {victim} with an arrow from {distance}m, while he slept."});
+            MessageConfig("Bite", new List<string>{"A {attacker} killed {victim}."});
+            MessageConfig("BiteSleep", new List<string>{"A {attacker} killed {victim}, while he slept."});
+            MessageConfig("AnimalDeath", new List<string>{"{attacker} killed a {victim} with a {weapon} from {distance}m."});
         }
 		
         void OnEntityDeath(BaseCombatEntity vic, HitInfo hitInfo)
         {
+			string weapon = "Unknown";
+			string msg = "Unknown";
+			string bodypart = "Unknown";
+			string dmg = "Unknown";
+			string victim = "Unknown";
+			string attacker = "Unknown";
+			bool sleeping = false;
+			string codeLocation = "OnEntityDeath Beginning";
+			
+			//###################################################//
+			//##############  LOCATION: Beginning  ##############//
+			//###################  PART: Main  ##################//
+			//###################################################//
+			
+			DebugMessage("PART: Main | LOCATION: Beginning");
+			
+			//	OnEntityDeath Beginning | Main: Declaration
+			codeLocation = "OnEntityDeath Beginning | Main: Declaration";
+			DebugMessage("AT: " + codeLocation);
 			try
-			{			
+			{
 				if(hitInfo == null) return;
 				
-				string weapon = "";
-				string msg = null;
+				dmg = FirstUpper(vic.lastDamage.ToString() ?? "Unknown");
+				if((bool) string.IsNullOrEmpty(dmg)) dmg = "Unknown";
 				
-				string dmg = FirstUpper(vic.lastDamage.ToString());
-				if(dmg == null || dmg == "") dmg = "None";
-
-				string bodypart = GetFormattedBodypart(StringPool.Get(hitInfo.HitBone), true);
-				if(bodypart == null || bodypart == "") bodypart = "None";
-				
-				string victim = "";
-				string attacker = null;
-				bool sleeping = false;
-				
-				try
+				bodypart = StringPool.Get(hitInfo.HitBone) ?? "Unknown";
+				if((bool) string.IsNullOrEmpty(bodypart)) bodypart = "Unknown";
+			}
+			catch(Exception ex)
+			{
+				LogError(codeLocation, ex);
+				return;
+			}
+			
+			//	OnEntityDeath Beginning | Main: Getting Attacker
+			codeLocation = "OnEntityDeath End | Message: Sending & New2Config";
+			DebugMessage("AT: " + codeLocation);
+			try
+			{
+				if(hitInfo.Initiator != null)
 				{
-					if(hitInfo.Initiator != null)
+					if(hitInfo.Initiator.ToPlayer() != null)
 					{
-						if(hitInfo.Initiator.ToPlayer() != null)
-						{
-							attacker = hitInfo.Initiator.ToPlayer().displayName;
-						}
-						else
-						{
-							attacker = FirstUpper(hitInfo.Initiator.LookupShortPrefabName());
-						}
+						attacker = hitInfo.Initiator.ToPlayer().displayName;
 					}
 					else
 					{
-						attacker = "None";
+						attacker = FirstUpper(hitInfo.Initiator.LookupShortPrefabName());
 					}
 				}
-				catch (Exception ex)
+				else
 				{
-					ConVar.Server.Log("oxide/logs/DeathNotes_ErrorLog.txt", "Failed at getting attacker: " + ex.Message.ToString());
-					return;
+					attacker = "None";
 				}
-				
-				try
+			}
+			catch (Exception ex)
+			{
+				LogError(codeLocation, ex);
+				return;
+			}
+			
+			//###################################################//
+			//################  LOCATION: Middle  ###############//
+			//###################################################//
+			
+			DebugMessage("PART: Main | LOCATION: Middle");
+			
+			//	OnEntityDeath Middle | Main: Getting Victim
+			codeLocation = "OnEntityDeath Middle | Main: Getting Victim";
+			DebugMessage("AT: " + codeLocation);
+			try
+			{
+				if(!vic.ToString().Contains("corpse"))
 				{
-					if(!vic.ToString().Contains("corpse"))
-					{	
-						if(vic != null)
+					if(vic != null)
+					{
+						if(vic.ToPlayer() != null)
 						{
-							if(vic.ToPlayer() != null)
+							victim = vic.ToPlayer().displayName;
+							sleeping = (bool)vic.ToPlayer().IsSleeping();
+							
+							//	Is it Suicide or Metabolism?
+							if(dmg == "Suicide" && (bool)Config["Settings", "ShowSuicides"]) msg = dmg;
+							if(metabolism.Contains(dmg) && (bool)Config["Settings", "ShowMetabolismDeaths"]) msg = dmg;
+							
+							//	Is Attacker a Player?
+							if(hitInfo.Initiator != null && hitInfo.Initiator.ToPlayer() != null && playerDamageTypes.Contains(dmg) && hitInfo.WeaponPrefab.ToString().Contains("grenade") == false)
 							{
-								victim = vic.ToPlayer().displayName;
-								
-								sleeping = (bool)vic.ToPlayer().IsSleeping();
-								
-								//	Is it Suicide or Metabolism?
-								if(dmg == "Suicide" && (bool)Config["Settings", "ShowSuicides"]) msg = dmg;
-								if(metabolism.Contains(dmg) && (bool)Config["Settings", "ShowMetabolismDeaths"]) msg = dmg;
-								
-								//	Is Attacker a Player?
-								if(hitInfo.Initiator != null && hitInfo.Initiator.ToPlayer() != null && playerDamageTypes.Contains(dmg) && hitInfo.WeaponPrefab.ToString().Contains("grenade") == false)
+								if(hitInfo.WeaponPrefab.ToString().Contains("hunting") || hitInfo.WeaponPrefab.ToString().Contains("bow"))
 								{
-									if(hitInfo.WeaponPrefab.ToString().Contains("hunting") || hitInfo.WeaponPrefab.ToString().Contains("bow"))
-									{
-										if(sleeping) msg = "ArrowSleep";
-										else msg = "Arrow";
-									}
-									else
-									{
-										if(sleeping) msg = dmg + "Sleep";
-										else msg = dmg;
-									}
+									if(sleeping) msg = "ArrowSleep";
+									else msg = "Arrow";
 								}
-								//	Is Attacker an explosive?
-								else if(dmg == "Explosion" || dmg == "Stab" && (bool)Config["Settings", "ShowExplosionDeaths"])
+								else
 								{
-									msg = "Explosion";
-								}
-								//	Is Attacker a trap?
-								else if(traps.Contains(attacker) && (bool)Config["Settings", "ShowTrapDeaths"])
-								{
-									msg = "Trap";
-								}
-								//	Is Attacker a Barricade?
-								else if(barricadeDamageTypes.Contains(dmg) && (bool)Config["Settings", "ShowBarricadeDeaths"])
-								{
-									msg = "Barricade";
-								}
-								//	Is Attacker an Animal?
-								else if(dmg == "Bite" && (bool)Config["Settings", "ShowAnimalKills"])
-								{
-									if(sleeping) msg = "BiteSleep";
-									else msg = "Bite";
+									if(sleeping) msg = dmg + "Sleep";
+									else msg = dmg;
 								}
 							}
-							//	Victim is an Animal
-							else if(vic.ToString().Contains("animals") && (bool)Config["Settings", "ShowAnimalDeaths"])
+							//	Is Attacker an explosive?
+							else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("grenade") || dmg == "Explosion" && (bool)Config["Settings", "ShowExplosionDeaths"])
 							{
-								victim = FirstUpper(vic.LookupShortPrefabName());	
-								msg = "AnimalDeath";
-								if(dmg == "Explosion") msg = "Explosion";
+								msg = "Explosion";
 							}
+							//	Is Attacker a trap?
+							else if(traps.Contains(attacker) && (bool)Config["Settings", "ShowTrapDeaths"])
+							{
+								msg = "Trap";
+							}
+							//	Is Attacker a Barricade?
+							else if(barricadeDamageTypes.Contains(dmg) && (bool)Config["Settings", "ShowBarricadeDeaths"])
+							{
+								msg = "Barricade";
+							}
+							//	Is Attacker an Animal?
+							else if(dmg == "Bite" && (bool)Config["Settings", "ShowAnimalKills"])
+							{
+								if(sleeping) msg = "BiteSleep";
+								else msg = "Bite";
+							}
+						}
+						//	Victim is an Animal
+						else if(vic.ToString().Contains("animals") && (bool)Config["Settings", "ShowAnimalDeaths"])
+						{
+							victim = FirstUpper(vic.LookupShortPrefabName());	
+							msg = "AnimalDeath";
+							if(dmg == "Explosion") msg = "Explosion";
 						}
 					}
 				}
-				catch (Exception ex)
-				{
-					ConVar.Server.Log("oxide/logs/DeathNotes_ErrorLog.txt", "Failed at getting victim: " + ex.Message.ToString());
-					return;
-				}
-
-				if(msg != null)
+			}
+			catch (Exception ex)
+			{
+				LogError(codeLocation, ex);
+				return;
+			}
+			
+			//###################################################//
+			//#################  LOCATION: End  #################//
+			//#################  PART: Message  #################//
+			//###################################################//
+			
+			DebugMessage("PART: Message | LOCATION: End");
+			
+			if(msg != null)
+			{
+				//	OnEntityDeath End | Message: Silencer Check
+				codeLocation = "OnEntityDeath End | Message: Silencer Check";
+				DebugMessage("AT: " + codeLocation);
+				try
 				{
 					weapon = hitInfo?.Weapon?.GetItem().info?.displayName?.english?.ToString();
-					if(weapon.Contains("Semi-Automatic Pistol")) weapon = "Semi-Automatic Pistol";
-					if(hitInfo.Weapon.children != null)
+					if(weapon != null && weapon.Contains("Semi-Automatic Pistol")) weapon = "Semi-Automatic Pistol";
+					if(hitInfo?.Weapon?.children != null)
 					{
-						foreach(var cur in hitInfo.Weapon.children)
+						foreach(var cur in hitInfo?.Weapon?.children as List<BaseEntity>)
 						{
 							ProjectileWeaponMod curr = (ProjectileWeaponMod)cur;
-							if(curr.isSilencer)
+							if((bool)curr?.isSilencer)
 							{
 								weapon = "Silenced " + weapon;
 								break;
 							}	
 						}
 					}
-
-					string formattedDistance = "";
-
-					if(hitInfo.Initiator != null) 
-					formattedDistance = GetFormattedDistance(GetDistance(vic, hitInfo.Initiator));
-
-					string formattedVictim = GetFormattedVictim(victim, false);
-					string formattedAttacker = GetFormattedAttacker(attacker, false);
-					string formattedAnimal = GetFormattedAnimal(attacker);
-					string formattedBodypart = GetFormattedBodypart(bodypart, false);
-					string formattedWeapon = GetFormattedWeapon(weapon);
-
-					string rawVictim = GetFormattedVictim(victim, true);
-					string rawAttacker = GetFormattedAttacker(attacker, true);
-					string rawAnimal = attacker;
-					string rawBodypart = GetFormattedBodypart(bodypart, true);
-					string rawWeapon = weapon;
+				}
+				catch(Exception ex)
+				{
+					LogError(codeLocation, ex);
+					return;
+				}
+				
+				string formattedDistance = "0";
+				string formattedVictim = "Unknown";
+				string formattedAttacker = "Unknown";
+				string formattedAnimal = "Unknown";
+				string formattedBodypart = "Unknown";
+				string formattedWeapon = "Unknown";
+				string rawVictim = "Unknown";
+				string rawAttacker = "Unknown";
+				string rawAnimal = "Unknown";
+				string rawBodypart = "Unknown";
+				string rawWeapon = "Unknown";
+				
+				string deathmsg = "";
+				string rawmsg = "";
+				
+				//	OnEntityDeath End | Message: Declaration
+				codeLocation = "OnEntityDeath End | Message: Declaration";
+				DebugMessage("AT: " + codeLocation);
+				try
+				{
+					if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("f1")) weapon = "F1 Grenade";
+					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("beancan")) weapon = "Beancan Grenade";
+					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("timed")) weapon = "Timed Explosive Charge";
+					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("rocket")) weapon = "Rocket Launcher";
 					
-
-
-					string deathmsg = Config["Messages", msg].ToString();
-					string rawmsg = Config["Messages", msg].ToString();
+					if(hitInfo.Initiator != null) formattedDistance = GetFormattedDistance(GetDistance(vic, hitInfo.Initiator) ?? "0");
+					formattedVictim = GetFormattedVictim(victim ?? "Unknown", false);
+					if(hitInfo.Initiator != null) formattedAttacker = GetFormattedAttacker(attacker ?? "Unknown", false);
+					formattedAnimal = GetFormattedAnimal(attacker ?? "Unknown", false);
+					if(hitInfo.Initiator != null) formattedBodypart = GetFormattedBodypart(bodypart ?? "Unknown", false);
+					if(hitInfo.Initiator != null) formattedWeapon = GetFormattedWeapon(weapon ?? "Unknown");
+					rawVictim = GetFormattedVictim(victim ?? "Unknown", true);
+					if(hitInfo.Initiator != null) rawAttacker = GetFormattedAttacker(attacker ?? "Unknown", true);
+					rawAnimal = GetFormattedAnimal(attacker ?? "Unknown", true);
+					if(hitInfo.Initiator != null) rawBodypart = GetFormattedBodypart(bodypart ?? "Unknown", true);
+					if(hitInfo.Initiator != null) rawWeapon = weapon ?? "Unknown";
+					
+					deathmsg = GetRandomMessage(msg) ?? GetRandomMessage("Unknown");
+					rawmsg = GetRandomMessage(msg) ?? GetRandomMessage("Unknown");
 					
 					deathmsg = deathmsg.Replace("{victim}", formattedVictim);
 					rawmsg = rawmsg.Replace("{victim}", rawVictim);
-
 					
 					if(hitInfo.Initiator != null)
 					{
@@ -262,62 +362,82 @@ namespace Oxide.Plugins
 						if(msg == "Bite") rawmsg = rawmsg.Replace("{attacker}", rawAnimal);
 						else rawmsg = rawmsg.Replace("{attacker}", rawAttacker);
 					}
-
-					try
+				}
+				catch(Exception ex)
+				{
+					LogError(codeLocation, ex);
+					return;
+				}
+				
+				//	OnEntityDeath End | Message: Check for needed vars
+				codeLocation = "OnEntityDeath End | Message: Check for needed vars";
+				DebugMessage("AT: " + codeLocation);
+				try
+				{
+					if (vic.ToString().Contains("animals") && hitInfo.Initiator == null)
 					{
-						if (vic.ToString().Contains("animals") && hitInfo.Initiator == null)
-						{
-							return;
-						}
-						
-						if (vic.ToString().Contains("animals") && hitInfo.Initiator.ToString().Contains("animals"))
-						{
-							return;
-						}
-						
-						if(vic.ToPlayer() == null && hitInfo.Initiator == null)
-						{
-							return;
-						}
-					}
-					catch (Exception ex)
-					{
-						ConVar.Server.Log("oxide/logs/DeathNotes_ErrorLog.txt", "Failed at checking for victim & attacker: " + ex.Message.ToString());
 						return;
 					}
 					
-					
-					if(formattedBodypart != null) deathmsg = deathmsg.Replace("{bodypart}", formattedBodypart);
-					if(hitInfo.Initiator != null) deathmsg = deathmsg.Replace("{distance}", formattedDistance);
-					if(hitInfo.Weapon != null) deathmsg = deathmsg.Replace("{weapon}", formattedWeapon);
-					
-
-					if(formattedBodypart != null) rawmsg = rawmsg.Replace("{bodypart}", rawBodypart);
-					if(hitInfo.Initiator != null) rawmsg = rawmsg.Replace("{distance}", GetDistance(vic, hitInfo.Initiator));
-					if(hitInfo.Weapon != null) rawmsg = rawmsg.Replace("{weapon}", rawWeapon);
-					
-					try
+					if (vic.ToString().Contains("animals") && hitInfo.Initiator.ToString().Contains("animals"))
 					{
-						if(msg != "AnimalDeath") AddNewToConfig(rawBodypart, weapon);
-						BroadcastDeath(prefix + " " + GetFormattedMessage(deathmsg), rawmsg, vic);
+						return;
 					}
-					catch (Exception ex)
+					
+					if(vic.ToPlayer() == null && hitInfo.Initiator == null)
 					{
-						ConVar.Server.Log("oxide/logs/DeathNotes_ErrorLog.txt", "Failed at sending Message & new2Config: " + ex.Message.ToString());
 						return;
 					}
 				}
+				catch (Exception ex)
+				{
+					LogError(codeLocation, ex);
+					return;
+				}
+				
+				if(formattedBodypart != null) deathmsg = deathmsg.Replace("{bodypart}", formattedBodypart);
+				if(hitInfo.Initiator != null) deathmsg = deathmsg.Replace("{distance}", formattedDistance);
+				if(hitInfo.Weapon != null || hitInfo.WeaponPrefab != null) deathmsg = deathmsg.Replace("{weapon}", formattedWeapon);
+				
+				if(formattedBodypart != null) rawmsg = rawmsg.Replace("{bodypart}", rawBodypart);
+				if(hitInfo.Initiator != null) rawmsg = rawmsg.Replace("{distance}", GetDistance(vic, hitInfo.Initiator));
+				if(hitInfo.Weapon != null || hitInfo.WeaponPrefab != null) rawmsg = rawmsg.Replace("{weapon}", rawWeapon);
+				
+				//	OnEntityDeath End | Message: Sending & New2Config
+				codeLocation = "OnEntityDeath End | Message: Sending & New2Config";
+				DebugMessage("AT: " + codeLocation);
+				try
+				{
+					if(victim == "Unknown" && BasePlayer.Find(victim) == null) return;
+					if((bool) string.IsNullOrEmpty(rawBodypart)) rawBodypart = "Unknown";
+					if((bool) string.IsNullOrEmpty(weapon)) weapon = "Unknown";
+					if(msg != "AnimalDeath") AddNewToConfig(rawBodypart, weapon);
+					BroadcastDeath(prefix + GetFormattedMessage(deathmsg), rawmsg, vic);
+				}
+				catch (Exception ex)
+				{
+					LogError(codeLocation, ex);
+					return;
+				}
 			}
-			catch(Exception ex)
-			{
-				ConVar.Server.Log("oxide/logs/DeathNotes_ErrorLog.txt", "Failed at unknown position in OnEntityDeath: " + ex.Message.ToString());
-			}
-        }
+		}
 		#endregion
-		
+	
 		#region FormattingMethods		
+		string GetRandomMessage(string msg)
+		{
+			DebugMessage("GetRandomMessage(" + msg + ")");
+			List<object> messages = Config["Messages", msg] as List<object>;
+			
+			string rndmMsg = "";
+			int rndm = Convert.ToInt32(Oxide.Core.Random.Range(0, Convert.ToInt32(messages.Count())));
+			rndmMsg = messages[rndm]?.ToString() ?? "{victim} died by an unknown reason";
+			return rndmMsg;
+		}
+		
 		string FirstUpper(string s)
 		{
+			DebugMessage("FirstUpper(" + s + ")");
 			if (string.IsNullOrEmpty(s))
 			{
 				return string.Empty;
@@ -328,6 +448,7 @@ namespace Oxide.Plugins
 		
 		string GetFormattedAttacker(string attacker, bool raw)
 		{
+			DebugMessage("GetFormattedAttacker(" + attacker + ", " + raw.ToString() + ")");
 			attacker = attacker.Replace(".prefab", "");
 			attacker = attacker.Replace("Beartrap", "Bear Trap");
 			attacker = attacker.Replace("Floor_spikes", "Floor Spike Trap");
@@ -341,6 +462,7 @@ namespace Oxide.Plugins
 		
 		string GetFormattedVictim(string victim, bool raw)
 		{
+			DebugMessage("GetFormattedVictim(" + victim + ", " + raw.ToString() + ")");
 			victim = victim.Replace(".prefab", "");
 			if(Config["Animals", victim] != null) victim = (string)Config["Animals", victim];
 			if(!raw) victim = "<color=" + Config["Colors", "Victim"].ToString() + ">" + victim + "</color>";
@@ -349,32 +471,37 @@ namespace Oxide.Plugins
 		
 		string GetFormattedDistance(string distance)
 		{
+			DebugMessage("GetFormattedDistance(" + distance + ")");
 			distance = "<color=" + Config["Colors", "Distance"].ToString() + ">" + distance + "</color>";
 			return distance;
 		}
 		
 		string GetFormattedMessage(string message)
 		{
+			DebugMessage("GetFormattedMessage(" + message + ")");
 			message = "<color=" + Config["Colors", "Message"].ToString() + ">" + message + "</color>";
 			return message;
 		}
 		
 		string GetFormattedWeapon(string weapon)
 		{
+			DebugMessage("GetFormattedWeapon(" + weapon + ")");
 			ConfigWeapon(weapon);
 			weapon = "<color=" + Config["Colors", "Weapon"].ToString() + ">" + Config["Weapons", weapon] + "</color>";
 			return weapon;
 		}
 		
-		string GetFormattedAnimal(string animal)
+		string GetFormattedAnimal(string animal, bool raw)
 		{
+			DebugMessage("GetFormattedAnimal(" + animal + ")");
 			animal = animal.Replace(".prefab", "");
-			animal = "<color=" + Config["Colors", "Animal"].ToString() + ">" + Config["Animals", animal] + "</color>";
+			if(!raw) animal = "<color=" + Config["Colors", "Animal"].ToString() + ">" + Config["Animals", animal] + "</color>";
 			return animal;
 		}
 		
 		string GetFormattedBodypart(string bodypart, bool raw)
 		{
+			DebugMessage("GetFormattedBodypart(" + bodypart + ", " + raw.ToString() + ")");
 			for(int i = 0; i < 10; i++)
 			{
 				bodypart = bodypart.Replace(i.ToString(), "");
@@ -406,6 +533,27 @@ namespace Oxide.Plugins
 		#endregion
 		
         #region UsefulMethods
+		//--------------------------->   Webrequest   <---------------------------//
+		
+		void ShowInfo(BasePlayer player)
+		{
+			webRequests.EnqueueGet("http://oxidemod.org/plugins/death-notes.819/", (code, response) => VersionRecieved(code, response, player), this);
+		}
+		
+		void VersionRecieved(int code, string response, BasePlayer player)
+		{
+			if (response == null || code != 200)
+            {
+                Puts("Web Request failed.");
+			}
+			
+			string version = "0.0.0";
+			Match match = new Regex(@"<h\d>Version (\d+(?:\.\d+){1,3})<\/h\d>").Match(response);
+			if(match.Success) version = match.Groups[1].ToString();
+			
+			SendChatMessage(player, "<size=25><color=grey>Death Notes</color></size><color=grey> by LaserHydra\nInstalled Version:</color> " + this.Version + "\n<color=grey>Latest Version:</color> " + version, null, profile);
+		}
+		
         //------------------------------>   Config   <------------------------------//
 		
 		void AddNewToConfig(string bodypart, string weapon)
@@ -416,34 +564,34 @@ namespace Oxide.Plugins
 			SaveConfig();
 		}
 		
+		void MessageConfig(string MsgName, List<string> Data)
+        {
+            if (Config["Messages", MsgName] == null) Config["Messages", MsgName] = Data;
+        }
+		
 		void ConfigWeapon(string weapon)
         {
             if (Config["Weapons", weapon] == null) Config["Weapons", weapon] = weapon;
-            if (Config["Weapons", weapon].ToString() != weapon) return;
         }
 		
 		void ConfigBodypart(string bodypart)
         {
             if (Config["Bodyparts", bodypart] == null) Config["Bodyparts", bodypart] = bodypart;
-            if (Config["Bodyparts", bodypart].ToString() != bodypart) return;
         }
 		
         void StringConfig(string GroupName, string DataName, string Data)
         {
             if (Config[GroupName, DataName] == null) Config[GroupName, DataName] = Data;
-            if (Config[GroupName, DataName].ToString() != Data) return;
         }
 
         void BoolConfig(string GroupName, string DataName, bool Data)
         {
             if (Config[GroupName, DataName] == null) Config[GroupName, DataName] = Data;
-            if ((bool)Config[GroupName, DataName] != Data) return;
         }
 
         void IntConfig(string GroupName, string DataName, int Data)
         {
             if (Config[GroupName, DataName] == null) Config[GroupName, DataName] = Data;
-            if (Convert.ToInt32(Config[GroupName, DataName]) != Data) return;
         }
 
 		//------------------------------>   Vector3   <------------------------------//
@@ -470,21 +618,23 @@ namespace Oxide.Plugins
             }
         }
 
-        void SendChatMessage(BasePlayer player, string prefix, string msg = null)
+        void SendChatMessage(BasePlayer player, string prefix, string msg = null, string userid = "0")
         {
-            if(msg != null)
+            if (player?.net == null) return;
+            if (msg != null)
             {
-                SendReply(player, "<color=orange>" + prefix + "</color>: " + msg);
+                player.SendConsoleCommand("chat.add", userid, "<color=orange>" + prefix + "</color>: " + msg, 1.0);
             }
             else
             {
                 msg = prefix;
-                SendReply(player, msg);
+                player.SendConsoleCommand("chat.add", userid, msg, 1.0);
             }
         }
 		
 		void BroadcastDeath(string deathmessage, string rawmessage, BaseEntity victim)
 		{
+			DebugMessage("Chatmsg: " + deathmessage + ", Rawmsg: " + rawmessage);
 			if((bool)Config["Settings", "MessageInRadius"])
 			{
 				foreach(BasePlayer player in BasePlayer.activePlayerList)
@@ -494,8 +644,28 @@ namespace Oxide.Plugins
 			}
 			else ConsoleSystem.Broadcast("chat.add", profile, deathmessage, 1.0);
 			
+			if((bool)Config["Settings", "UsePopupNotifications"]) PopupNotifications?.Call("CreatePopupNotification", deathmessage);
+			
 			if((bool)Config["Settings", "BroadcastToConsole"]) Puts(rawmessage);
-			ConVar.Server.Log("oxide/logs/DeathNotes_Kills.txt", rawmessage + "\n");
+			ConVar.Server.Log("oxide/logs/DeathNotes_Kills.txt", rawmessage);
+		}
+		
+		void LogError(string where, Exception ex)
+		{
+			ConVar.Server.Log("oxide/logs/DeathNotes_ErrorLog.txt", "FAILED AT: " + where + " | " + ex.ToString() + "\n");
+			//Puts("FAILED AT: " + where + " | " + ex.ToString());
+		}
+		
+		void DebugMessage(string message)
+		{
+			if(debugging == false) return;
+			Puts(message);
+			
+			foreach(var cur in BasePlayer.activePlayerList)
+			{
+				if(cur.displayName == "John[BOT]") continue;
+				if(permission.UserHasPermission(cur.userID.ToString(), "deathnotes.debug")) cur.SendConsoleCommand("echo '<color=red>" + message + "</color>'");
+			}
 		}
 
         //---------------------------------------------------------------------------//

@@ -6,6 +6,22 @@
     "y max": "0.95",
     "y min": "0.87"
   },
+  "GUI - Position - X Max": "0.4",
+  "GUI - Position - X Min": "0.1",
+  "GUI - Position - Y Max": "0.90",
+  "GUI - Position - Y Min": "0.65",
+  "Message - Admin Override Disabled the Remover Tool": "The remover tool was disabled for the time being.",
+  "Message - Cant Use Remove With Item": "You can't use the remover tool while you have an active item",
+  "Message - External Plugin Blocking Remove": "You are not allowed use the remover tool at the moment",
+  "Message - Multiple Players Found": "Multiple players found",
+  "Message - No Players Found": "No players found",
+  "Message - No Rights To Remove This": "You have no rights to remove this",
+  "Message - Not Allowed": "You are not allowed to use this command",
+  "Message - Not Enough To Pay": "You don't have enough to pay for this remove",
+  "Message - Nothing To Remove": "Couldn't find anything to remove. Are you close enough?",
+  "Message - Raid Blocked": "RaidBlocker: You need to wait for {0}s before being allowed to remove again",
+  "Message - Remover Tool Ended": "{0}: Remover Tool Deactivated",
+  "Message - Target Remover Tool Ended": "The Remover Tool for {0} has ended",
   "Messages": {
     "cantRemove": "You are not allowed to remove this",
     "helpAdmin": "/remove admin Optional:Time - To remove start removing anything",
@@ -37,6 +53,62 @@
     "basic": 0,
     "target": 1
   },
+  "Remove - Access - Use Building Owners": true,
+  "Remove - Access - Use RustIO & BuildingOwners (Building Owners needs to be true)": true,
+  "Remove - Access - Use ToolCupboards": true,
+  "Remove - Auth - AuthLevel - Admin Commands": 1,
+  "Remove - Auth - AuthLevel - Normal Remove": 0,
+  "Remove - Auth - Permission - Admin Remove": "canremoveadmin",
+  "Remove - Auth - Permission - All Remove": "canremoveall",
+  "Remove - Auth - Permission - Normal Remove": "canremove",
+  "Remove - Auth - Permission - Target Remove": "canremovetarget",
+  "Remove - Default Time": 30,
+  "Remove - Distance - Admin": 20,
+  "Remove - Distance - All": 300,
+  "Remove - Distance - Player": 3,
+  "Remove - Max Remove Time": 120,
+  "Remove - Pay": true,
+  "Remove - Pay - Costs": {
+    "0": {
+      "wood": "1"
+    },
+    "1": {
+      "wood": "100"
+    },
+    "2": {
+      "stone": "150",
+      "wood": "100"
+    },
+    "3": {
+      "metal fragments": "75",
+      "stone": "50",
+      "wood": "100"
+    },
+    "4": {
+      "high quality metal": "25",
+      "metal fragments": "75",
+      "stone": "350",
+      "wood": "250"
+    },
+    "deployable": {
+      "wood": "50"
+    }
+  },
+  "Remove - Pay - Deployables": true,
+  "Remove - Pay - Structures": true,
+  "Remove - RaidBlocker": true,
+  "Remove - RaidBlocker - Radius To Block": 80,
+  "Remove - RaidBlocker - Time To Block": 300,
+  "Remove - Refund": true,
+  "Remove - Refund - Deployables": true,
+  "Remove - Refund - Percentage (Structures Only)": {
+    "0": "100.0",
+    "1": "80.0",
+    "2": "60.0",
+    "3": "40.0",
+    "4": "20.0"
+  },
+  "Remove - Refund - Structures": true,
   "RemoveTimer": {
     "default": 30,
     "max": 120
