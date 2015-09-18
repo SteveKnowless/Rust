@@ -29,7 +29,7 @@
       "Tree": 1.5
     },
     "GatherResourceModifiers": {
-      "*": 4.0,
+      "*": 10.0,
       "Bone Fragments": 1.0,
       "High Quality Metal Ore": 1.0,
       "Sulfur Ore": 2.0

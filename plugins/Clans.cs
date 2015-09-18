@@ -10,11 +10,9 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Oxide.Plugins
-{
-    [Info("Clans", "playrust.io / dcode", "1.5.3", ResourceId = 842)]
-    public class Clans : RustPlugin
-    {
+namespace Oxide.Plugins {
+    [Info("Clans", "playrust.io / dcode", "1.5.4", ResourceId = 842)]
+    public class Clans : RustPlugin {
 
         #region Rust:IO Bindings
 
@@ -23,6 +21,8 @@ namespace Oxide.Plugins
         private MethodInfo hasFriend;
         private MethodInfo addFriend;
         private MethodInfo deleteFriend;
+
+        FieldInfo displayName = typeof(BasePlayer).GetField("_displayName", (BindingFlags.Instance | BindingFlags.NonPublic));
 
         private void InitializeRustIO() {
             lib = Interface.GetMod().GetLibrary<Library>("RustIO");
@@ -54,7 +54,7 @@ namespace Oxide.Plugins
 
         #endregion
 
-        private Dictionary<string,Clan> clans = new Dictionary<string,Clan>();
+        private Dictionary<string, Clan> clans = new Dictionary<string, Clan>();
         private Dictionary<string, string> originalNames = new Dictionary<string, string>();
         private Regex tagRe = new Regex("^[a-zA-Z0-9]{2,6}$");
         private Dictionary<string, string> messages = new Dictionary<string, string>();
@@ -68,11 +68,11 @@ namespace Oxide.Plugins
             clans.Clear();
             var data = Interface.GetMod().DataFileSystem.GetDatafile("rustio_clans");
             if (data["clans"] != null) {
-                var clansData = (Dictionary<string,object>) Convert.ChangeType(data["clans"], typeof(Dictionary<string, object>));
+                var clansData = (Dictionary<string, object>)Convert.ChangeType(data["clans"], typeof(Dictionary<string, object>));
                 foreach (var iclan in clansData) {
                     string tag = iclan.Key;
-                    var clanData = iclan.Value as Dictionary<string,object>;
-                    string description = (string) clanData["description"];
+                    var clanData = iclan.Value as Dictionary<string, object>;
+                    string description = (string)clanData["description"];
                     string owner = (string)clanData["owner"];
                     List<string> moderators = new List<string>();
                     foreach (var imoderator in clanData["moderators"] as List<object>) {
@@ -224,7 +224,7 @@ namespace Oxide.Plugins
         }
 
         // Translates a string
-        private string _(string text, Dictionary<string,string> replacements = null) {
+        private string _(string text, Dictionary<string, string> replacements = null) {
             if (messages.ContainsKey(text) && messages[text] != null)
                 text = messages[text];
             if (replacements != null)
@@ -237,7 +237,7 @@ namespace Oxide.Plugins
         private Clan FindClan(string tag) {
             Clan clan;
             if (clans.TryGetValue(tag, out clan))
-                return clan; 
+                return clan;
             return null;
         }
 
@@ -281,9 +281,9 @@ namespace Oxide.Plugins
         private string StripTag(string name, Clan clan) {
             if (clan == null)
                 return name;
-            var re = new Regex(@"^\["+clan.tag+@"\]\s");
+            var re = new Regex(@"^\[" + clan.tag + @"\]\s");
             while (re.IsMatch(name))
-                name = name.Substring(clan.tag.Length+3);
+                name = name.Substring(clan.tag.Length + 3);
             return name;
         }
 
@@ -292,7 +292,7 @@ namespace Oxide.Plugins
             var prevName = player.displayName;
             var playerId = player.userID.ToString();
             var clan = FindClanByUser(playerId);
-            player.displayName = StripTag(player.displayName, clan);
+            displayName.SetValue(player, StripTag(player.displayName, clan));
             string originalName = null;
             if (!originalNames.ContainsKey(playerId)) {
                 originalNames.Add(playerId, originalName = player.displayName);
@@ -300,11 +300,11 @@ namespace Oxide.Plugins
                 originalName = originalNames[playerId];
             }
             if (clan == null) {
-                player.displayName = originalName;
+                displayName.SetValue(player, originalName);
             } else {
-                var tag = "[" + clan.tag + "]"+" ";
+                var tag = "[" + clan.tag + "]" + " ";
                 if (!player.displayName.StartsWith(tag))
-                    player.displayName = tag + originalName;
+                    displayName.SetValue(player, tag + originalName);
             }
             if (player.displayName != prevName)
                 player.SendNetworkUpdate();
@@ -361,7 +361,7 @@ namespace Oxide.Plugins
         void OnPlayerInit(BasePlayer player) {
             string originalName;
             if (originalNames.TryGetValue(player.userID.ToString(), out originalName))
-                player.displayName = originalName;
+                displayName.SetValue(player, originalName);
             try {
                 SetupPlayer(player);
                 var clan = FindClanByUser(player.userID.ToString());
@@ -391,11 +391,11 @@ namespace Oxide.Plugins
                     var playerId = Convert.ToUInt64(pair.Key);
                     var player = BasePlayer.FindByID(playerId);
                     if (player != null)
-                        player.displayName = pair.Value;
+                        displayName.SetValue(player, pair.Value);
                     else {
                         player = BasePlayer.FindSleeping(playerId);
                         if (player != null)
-                            player.displayName = pair.Value;
+                            displayName.SetValue(player, pair.Value);
                     }
                 }
             } catch (Exception ex) {
@@ -424,7 +424,7 @@ namespace Oxide.Plugins
             var sb = new StringBuilder();
             // No arguments: List clans and get help how to create one
             if (args.Length == 0) {
-                sb.Append("<size=22>Clans</size> "+Version+" by <color=#ce422b>http://playrust.io</color>\n");
+                sb.Append("<size=22>Clans</size> " + Version + " by <color=#ce422b>http://playrust.io</color>\n");
                 if (myClan == null) {
                     sb.Append(_("You are currently not a member of a clan.")).Append("\n");
                 } else {
@@ -532,10 +532,10 @@ namespace Oxide.Plugins
                     }
                     myClan.invited.Add(invUserId);
                     SaveData();
-                    myClan.Broadcast(_("%MEMBER% invited %PLAYER% to the clan.", new Dictionary<string,string>() { {"MEMBER",StripTag(player.displayName, myClan)}, {"PLAYER",invPlayer.displayName}}));
-                    invPlayer.SendConsoleCommand("chat.add", "", 
-                        _("You have been invited to join the clan:") + " [" + myClan.tag + "] " + myClan.description + "\n"+
-                        _("To join, type: <color=#ffd479>/clan join \"%TAG%\"</color>", new Dictionary<string,string>() {{"TAG",myClan.tag}}));
+                    myClan.Broadcast(_("%MEMBER% invited %PLAYER% to the clan.", new Dictionary<string, string>() { { "MEMBER", StripTag(player.displayName, myClan) }, { "PLAYER", invPlayer.displayName } }));
+                    invPlayer.SendConsoleCommand("chat.add", "",
+                        _("You have been invited to join the clan:") + " [" + myClan.tag + "] " + myClan.description + "\n" +
+                        _("To join, type: <color=#ffd479>/clan join \"%TAG%\"</color>", new Dictionary<string, string>() { { "TAG", myClan.tag } }));
                     break;
                 case "join":
                     if (args.Length != 2) {
@@ -560,7 +560,7 @@ namespace Oxide.Plugins
                     SaveData();
                     lookup[userId] = myClan;
                     SetupPlayer(player);
-                    myClan.Broadcast(_("%NAME% has joined the clan!", new Dictionary<string,string>() {{"NAME",StripTag(player.displayName,myClan)}}));
+                    myClan.Broadcast(_("%NAME% has joined the clan!", new Dictionary<string, string>() { { "NAME", StripTag(player.displayName, myClan) } }));
                     foreach (var memberId in myClan.members) {
                         if (memberId != userId && IsInstalled() && addClanMatesAsFriends) {
                             AddFriend(memberId, userId);
@@ -597,7 +597,7 @@ namespace Oxide.Plugins
                     }
                     myClan.moderators.Add(promotePlayerUserId);
                     SaveData();
-                    myClan.Broadcast(_("%OWNER% promoted %MEMBER% to moderator.", new Dictionary<string,string>() {{"OWNER",StripTag(player.displayName,myClan)}, {"MEMBER",StripTag(promotePlayer.displayName,myClan)}}));
+                    myClan.Broadcast(_("%OWNER% promoted %MEMBER% to moderator.", new Dictionary<string, string>() { { "OWNER", StripTag(player.displayName, myClan) }, { "MEMBER", StripTag(promotePlayer.displayName, myClan) } }));
                     break;
                 case "demote":
                     if (args.Length != 2) {
@@ -653,7 +653,7 @@ namespace Oxide.Plugins
                     lookup.Remove(userId);
                     SetupPlayer(player); // Remove clan tag
                     sb.Append(_("You have left your current clan."));
-                    myClan.Broadcast(_("%NAME% has left the clan.", new Dictionary<string,string>() {{"NAME", player.displayName}}));
+                    myClan.Broadcast(_("%NAME% has left the clan.", new Dictionary<string, string>() { { "NAME", player.displayName } }));
                     break;
                 case "kick":
                     if (args.Length != 2) {
@@ -687,7 +687,7 @@ namespace Oxide.Plugins
                     SaveData();
                     lookup.Remove(kickPlayerUserId);
                     SetupPlayer(kickPlayer); // Remove clan tag
-                    myClan.Broadcast(_("%NAME% kicked %MEMBER% from the clan.", new Dictionary<string,string>() {{"NAME",StripTag(player.displayName,myClan)},{"MEMBER",kickPlayer.displayName}}));
+                    myClan.Broadcast(_("%NAME% kicked %MEMBER% from the clan.", new Dictionary<string, string>() { { "NAME", StripTag(player.displayName, myClan) }, { "MEMBER", kickPlayer.displayName } }));
                     break;
                 case "disband":
                     if (args.Length != 2) {
@@ -768,8 +768,7 @@ namespace Oxide.Plugins
         }
 
         // Represents a clan
-        public class Clan
-        {
+        public class Clan {
             public string tag;
             public string description;
             public string owner;

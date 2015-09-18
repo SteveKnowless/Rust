@@ -9,7 +9,7 @@ using Oxide.Core.Plugins;
 
 namespace Oxide.Plugins
 {
-    [Info("RemoverTool", "Reneb", "3.0.3", ResourceId = 651)]
+    [Info("RemoverTool", "Reneb", "3.0.4", ResourceId = 651)]
     class RemoverTool : RustPlugin
     {
 
@@ -126,7 +126,7 @@ namespace Oxide.Plugins
         static string MessageOverrideDisabled = "The remover tool was disabled for the time being.";
         static string MessageToolDeactivated = "{0}: Remover Tool Deactivated";
         static string MessageRaidBlocked = "RaidBlocker: You need to wait for {0}s before being allowed to remove again";
-        static string MessageErrorCantUseRemoveWithItem = "You can't use the remover tool while you have an active item";
+        static string MessageErrorCantUseRemoveWithItem = "You can't use the remover tool while you are holding an item";
 
         void Init()
         {
@@ -562,7 +562,7 @@ namespace Oxide.Plugins
                 entity = removeObject.ToString();
                 entity = entity.Substring(entity.LastIndexOf("/") + 1).Replace(".prefab", "").Replace("_deployed", "").Replace(".deployed", "");
                 entity = entity.Substring(0, entity.IndexOf("["));
-                if (toolPlayer.removeType == RemoveType.Normal)
+                if (usePay && toolPlayer.removeType == RemoveType.Normal)
                 {
                     Dictionary<string, object> costList = GetCost(removeObject);
                     foreach (KeyValuePair<string, object> pair in costList)

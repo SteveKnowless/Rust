@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Death Notes", "LaserHydra", "3.3.3", ResourceId = 819)]
+    [Info("Death Notes", "LaserHydra", "3.3.41", ResourceId = 819)]
     [Description("Broadcasts players/animals deaths to chat")]
     class DeathNotes : RustPlugin
     {
@@ -139,6 +139,7 @@ namespace Oxide.Plugins
         void OnEntityDeath(BaseCombatEntity vic, HitInfo hitInfo)
         {
 			string weapon = "Unknown";
+			string attachments = "Unknown";
 			string msg = "Unknown";
 			string bodypart = "Unknown";
 			string dmg = "Unknown";
@@ -225,7 +226,7 @@ namespace Oxide.Plugins
 							if(metabolism.Contains(dmg) && (bool)Config["Settings", "ShowMetabolismDeaths"]) msg = dmg;
 							
 							//	Is Attacker a Player?
-							if(hitInfo.Initiator != null && hitInfo.Initiator.ToPlayer() != null && playerDamageTypes.Contains(dmg) && hitInfo.WeaponPrefab.ToString().Contains("grenade") == false)
+							if(hitInfo.Initiator != null && hitInfo.Initiator.ToPlayer() != null && playerDamageTypes.Contains(dmg) && hitInfo.WeaponPrefab.ToString().Contains("grenade") == false && hitInfo.WeaponPrefab.ToString().Contains("survey") == false)
 							{
 								if(hitInfo.WeaponPrefab.ToString().Contains("hunting") || hitInfo.WeaponPrefab.ToString().Contains("bow"))
 								{
@@ -239,8 +240,10 @@ namespace Oxide.Plugins
 								}
 							}
 							//	Is Attacker an explosive?
-							else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("grenade") || dmg == "Explosion" && (bool)Config["Settings", "ShowExplosionDeaths"])
+							else if(hitInfo.WeaponPrefab != null || dmg == "Explosion" && (bool)Config["Settings", "ShowExplosionDeaths"])
 							{
+								if(hitInfo.WeaponPrefab.ToString().Contains("grenade") == false && hitInfo.WeaponPrefab.ToString().Contains("survey") == false && dmg != "Explosion") return;
+							
 								msg = "Explosion";
 							}
 							//	Is Attacker a trap?
@@ -292,17 +295,16 @@ namespace Oxide.Plugins
 				{
 					weapon = hitInfo?.Weapon?.GetItem().info?.displayName?.english?.ToString();
 					if(weapon != null && weapon.Contains("Semi-Automatic Pistol")) weapon = "Semi-Automatic Pistol";
-					if(hitInfo?.Weapon?.children != null)
+					
+					if (hitInfo.Weapon?.GetItem()?.contents?.itemList != null)
 					{
-						foreach(var cur in hitInfo?.Weapon?.children as List<BaseEntity>)
+						List<string> contents = new List<string>();
+						foreach (var content in hitInfo.Weapon.GetItem().contents.itemList)
 						{
-							ProjectileWeaponMod curr = (ProjectileWeaponMod)cur;
-							if((bool)curr?.isSilencer)
-							{
-								weapon = "Silenced " + weapon;
-								break;
-							}	
+							contents.Add(content.info.displayName.english);
 						}
+						
+						attachments = ArrayToString(contents.ToArray(), 0, " | ");
 					}
 				}
 				catch(Exception ex)
@@ -335,18 +337,33 @@ namespace Oxide.Plugins
 					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("beancan")) weapon = "Beancan Grenade";
 					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("timed")) weapon = "Timed Explosive Charge";
 					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("rocket")) weapon = "Rocket Launcher";
+					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("survey")) weapon = "Survey Charge";
 					
-					if(hitInfo.Initiator != null) formattedDistance = GetFormattedDistance(GetDistance(vic, hitInfo.Initiator) ?? "0");
 					formattedVictim = GetFormattedVictim(victim ?? "Unknown", false);
-					if(hitInfo.Initiator != null) formattedAttacker = GetFormattedAttacker(attacker ?? "Unknown", false);
-					formattedAnimal = GetFormattedAnimal(attacker ?? "Unknown", false);
-					if(hitInfo.Initiator != null) formattedBodypart = GetFormattedBodypart(bodypart ?? "Unknown", false);
-					if(hitInfo.Initiator != null) formattedWeapon = GetFormattedWeapon(weapon ?? "Unknown");
 					rawVictim = GetFormattedVictim(victim ?? "Unknown", true);
-					if(hitInfo.Initiator != null) rawAttacker = GetFormattedAttacker(attacker ?? "Unknown", true);
-					rawAnimal = GetFormattedAnimal(attacker ?? "Unknown", true);
-					if(hitInfo.Initiator != null) rawBodypart = GetFormattedBodypart(bodypart ?? "Unknown", true);
-					if(hitInfo.Initiator != null) rawWeapon = weapon ?? "Unknown";
+					
+					if(hitInfo.Initiator != null)
+					{
+						if(attachments != "Unknown")
+						{
+							formattedWeapon = GetFormattedWeapon(weapon + " (" + attachments + ")" ?? "Unknown");
+							rawWeapon = weapon + " (" + attachments + ")" ?? "Unknown";
+						}
+						else
+						{
+							formattedWeapon = GetFormattedWeapon(weapon ?? "Unknown");
+							rawWeapon = weapon ?? "Unknown";
+						}
+						
+						formattedBodypart = GetFormattedBodypart(bodypart ?? "Unknown", false);
+						formattedAnimal = GetFormattedAnimal(attacker ?? "Unknown", false);
+						formattedAttacker = GetFormattedAttacker(attacker ?? "Unknown", false);
+						formattedDistance = GetFormattedDistance(GetDistance(vic, hitInfo.Initiator) ?? "0");
+						
+						rawBodypart = GetFormattedBodypart(bodypart ?? "Unknown", true);
+						rawAnimal = GetFormattedAnimal(attacker ?? "Unknown", true);
+						rawAttacker = GetFormattedAttacker(attacker ?? "Unknown", true);
+					}
 					
 					deathmsg = GetRandomMessage(msg) ?? GetRandomMessage("Unknown");
 					rawmsg = GetRandomMessage(msg) ?? GetRandomMessage("Unknown");
@@ -553,6 +570,15 @@ namespace Oxide.Plugins
 			
 			SendChatMessage(player, "<size=25><color=grey>Death Notes</color></size><color=grey> by LaserHydra\nInstalled Version:</color> " + this.Version + "\n<color=grey>Latest Version:</color> " + version, null, profile);
 		}
+		
+		//---------------------------->   Converting   <----------------------------//
+
+        string ArrayToString(string[] array, int first, string seperator)
+        {
+            string output = String.Join(seperator, array.Skip(first).ToArray());
+			
+            return output;
+        }
 		
         //------------------------------>   Config   <------------------------------//
 		

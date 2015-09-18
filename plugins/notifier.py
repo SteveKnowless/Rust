@@ -16,7 +16,7 @@ class notifier:
     def __init__(self):
 
         self.Title = 'Notifier'
-        self.Version = V(2, 12, 0)
+        self.Version = V(2, 13, 5)
         self.Author = 'SkinN'
         self.Description = 'Broadcasts chat messages as notifications and advertising.'
         self.ResourceId = 797
@@ -36,7 +36,7 @@ class notifier:
                 'PLAYERS LIST ON CHAT': True,
                 'PLAYERS LIST ON CONSOLE': True,
                 'ADVERTS INTERVAL': 6,
-                'ENABLE PLAYERS DEFAULT COLORS': True,
+                'ENABLE PLAYERS DEFAULT COLORS': False,
                 'ENABLE PLUGIN ICON': True,
                 'ENABLE JOIN MESSAGE': True,
                 'ENABLE LEAVE MESSAGE': True,
@@ -51,8 +51,8 @@ class notifier:
                 'ENABLE ADVERTS COMMAND': True
             },
             'MESSAGES': {
-                'JOIN MESSAGE': '{username} joined the server, from <orange>{country}<end>.',
-                'LEAVE MESSAGE': '{username} left the server. (Reason: {reason})',
+                'JOIN MESSAGE': '<lime>{username}<end> joined the server, from <orange>{country}<end>.',
+                'LEAVE MESSAGE': '<lime>{username}<end> left the server. (Reason: <white>{reason}<end>)',
                 'CHECK CONSOLE': 'Check the console (press F1) for more info.',
                 'PLAYERS ONLINE': 'There are <lime>{active}<end>/<lime>{maxplayers}<end> players online.',
                 'ADMINS ONLINE': 'There are <cyan>{admins} Admins<end> online.',
@@ -77,7 +77,7 @@ class notifier:
                 'PLAYERS ONLINE DESC': '<orange>/online<end> <grey>-<end> Shows the number of players and <cyan>Admins<end> online, plus a few server stats.',
             },
             'WELCOME MESSAGE': (
-                '<size=17>Welcome {username}</size>',
+                '<size=17>Welcome <lime>{username}<end></size>',
                 '<orange><size=20>•</size><end> Type <orange>/help<end> for all available commands.',
                 '<orange><size=20>•</size><end> Check our server <orange>/rules<end>.',
                 '<orange><size=20>•</size><end> See where you are on the server map at: <lime>http://{server.ip}:{server.port}<end>'
@@ -90,7 +90,7 @@ class notifier:
                 'Type <orange>/map<end> for the server map link.',
                 'You are playing on: <lime>{server.hostname}<end>',
                 '<orange>Players Online: <lime>{players}<end> / <lime>{server.maxplayers}<end> Sleepers: <lime>{sleepers}<end><end>',
-                'The game time is <lime>{gametime}<end>',
+                'The game time is <lime>{gamedate} {gametime}<end>',
                 'The server time and date is <lime>{localdate} {localtime}<end>'
             ),
             'COLORS': {
@@ -230,7 +230,7 @@ class notifier:
 
             print('[%s v%s] :: %s' % (self.Title, str(self.Version), self.format(text, True)))
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def pcon(self, player, text, color='silver'):
         ''' Function to send a message to a player console '''
 
@@ -240,13 +240,13 @@ class notifier:
     def say(self, text, color='silver', f=True, profile=False):
         ''' Function to send a message to all players '''
 
-        if self.prefix and f:
+        if len(self.prefix) and f:
 
-            rust.BroadcastChat(self.format('%s <%s>%s<end>' % (self.prefix, color, text)), None, PROFILE if not profile else profile)
+            msg = self.format('%s <%s>%s<end>' % (self.prefix, color, text))
 
-        else:
+        else: msg = self.format('<%s>%s<end>' % (color, text))
 
-            rust.BroadcastChat(self.format('<%s>%s<end>' % (color, text)), None, PROFILE if not profile else profile)
+        rust.BroadcastChat(msg, None, PROFILE if not profile else profile)
 
         self.con(self.format(text, True))
 
@@ -254,13 +254,13 @@ class notifier:
     def tell(self, player, text, color='silver', f=True, profile=False):
         ''' Function to send a message to a player '''
 
-        if self.prefix and f:
+        if len(self.prefix) and f:
 
-            rust.SendChatMessage(player, self.format('%s <%s>%s<end>' % (self.prefix, color, text)), None, PROFILE if not profile else profile)
+            msg = self.format('%s <%s>%s<end>' % (self.prefix, color, text))
 
-        else:
+        else: msg = self.format('<%s>%s<end>' % (color, text))
 
-            rust.SendChatMessage(player, self.format('<%s>%s<end>' % (color, text)), None, PROFILE if not profile else profile)
+        rust.SendChatMessage(player, msg, None, PROFILE if not profile else profile)
 
     # -------------------------------------------------------------------------
     def log(self, filename, text):
@@ -271,7 +271,6 @@ class notifier:
             try:
 
                 filename = 'notifier_%s_%s.txt' % (filename, self.log_date())
-
                 sv.Log('oxide/logs/%s' % filename, text)
 
             except:
@@ -286,40 +285,34 @@ class notifier:
 
         self.con(LINE)
 
-        # Update Config File
         if self.Config['CONFIG_VERSION'] < LATEST_CFG or DEV:
 
             self.UpdateConfig()
 
         else: self.con('* Configuration file is up to date')
 
-        # Global / Class Variables
         global MSG, PLUGIN, COLOR, CMDS, ADVERTS, RULES
         MSG, COLOR, PLUGIN, CMDS, ADVERTS, RULES = [self.Config[x] for x in \
         ('MESSAGES', 'COLORS', 'SETTINGS', 'COMMANDS', 'ADVERTS', 'RULES')]
 
-        self.prefix = '<%s>%s<end>' % (COLOR['PREFIX'], PLUGIN['PREFIX']) if PLUGIN['PREFIX'] else False
-        self.cache = {}
+        self.prefix = '<%s>%s<end>' % (COLOR['PREFIX'], PLUGIN['PREFIX']) if PLUGIN['PREFIX'] else ''
+        self.players = {}
         self.connected = []
         self.lastadvert = 0
         self.adverts_loop = False
         self.logs = True
 
-        # Countries Data
         self.countries = data.GetData('notifier_countries_db')
         self.countries.update(self.countries_dict())
         data.SaveData('notifier_countries_db')
 
-        # Use Plugin Icon?
         if not PLUGIN['ENABLE PLUGIN ICON']:
 
             global PROFILE
             PROFILE = '0'
 
-        # Initiate active players
         for player in self.activelist(): self.OnPlayerInit(player, False)
 
-        # Start Adverts Loop
         if PLUGIN['ENABLE ADVERTS']:
 
             mins = PLUGIN['ADVERTS INTERVAL']
@@ -331,7 +324,6 @@ class notifier:
 
         else: self.con('* Adverts are disabled')
 
-        # Create Plugin Commands
         n = 0
 
         self.con('* Enabling commands:')
@@ -362,11 +354,10 @@ class notifier:
 
         self.con(LINE)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def Unload(self):
         ''' Hook called on plugin unload '''
 
-        # Destroy adverts {loop}
         if self.adverts_loop: self.adverts_loop.Destroy()
 
     # -------------------------------------------------------------------------
@@ -375,7 +366,6 @@ class notifier:
 
         if player and player.net:
 
-            # Cache player and list him to connected
             self.cache_player(player.net.connection)
 
             uid = self.playerid(player)
@@ -390,28 +380,23 @@ class notifier:
 
         uid = self.playerid(player)
 
-        if uid in self.cache:
+        if uid in self.players:
 
-            ply = self.cache[uid]
+            ply = self.players[uid]
 
-            # Is Player connected?
             if uid in self.connected:
 
                 self.connected.remove(uid)
 
-                if PLUGIN['ENABLE LEAVE MESSAGE']:
-                    
-                    if not (PLUGIN['HIDE ADMINS'] and int(ply['auth']) > 0):
+                if PLUGIN['ENABLE LEAVE MESSAGE'] and not (PLUGIN['HIDE ADMINS'] and player.IsAdmin()):
 
-                        reason = reason[8:] if reason.startswith('Kicked:') else reason
+                    reason = reason[8:] if reason.startswith('Kicked:') else reason
 
-                        self.say(MSG['LEAVE MESSAGE'].format(reason=reason, **ply), COLOR['LEAVE MESSAGE'], uid)
+                    self.say(MSG['LEAVE MESSAGE'].format(reason=reason, **ply), COLOR['LEAVE MESSAGE'], uid)
 
-                # Log disconnect
                 self.log('connections', '{username} disconnected from {country} [UID: {steamid}][IP: {ip}]'.format(**ply))
 
-            # Decache player
-            del self.cache[uid]
+            del self.players[uid]
 
     # -------------------------------------------------------------------------
     # - COMMAND FUNCTIONS
@@ -425,16 +410,13 @@ class notifier:
             rules = RULES[lang]
 
             s = {
-                'EN': 'English', 'PT': 'Portuguese', 'ES': 'Spanish',
-                'RO': 'Romanian', 'FR': 'French', 'IT': 'Italian',
-                'DK': 'Danish', 'TR': 'Turk', 'NL': 'Dutch',
-                'RU': 'Russian', 'UA': 'Ukrainian', 'DE': 'German',
-                'HU': 'Hungarian'
+                'EN': 'English', 'PT': 'Portuguese', 'ES': 'Spanish', 'RO': 'Romanian', 'FR': 'French', 'IT': 'Italian',
+                'DK': 'Danish', 'TR': 'Turk', 'NL': 'Dutch', 'RU': 'Russian', 'UA': 'Ukrainian', 'DE': 'German', 'HU': 'Hungarian'
             }
 
             if rules:
 
-                self.tell(player, '%s <%s>%s<end>:' % (self.prefix if self.prefix else '', COLOR['BOARDS TITLE'], MSG['RULES TITLE']), f=False)
+                self.tell(player, '%s <%s>%s<end>:' % (self.prefix, COLOR['BOARDS TITLE'], MSG['RULES TITLE']), f=False)
                 self.tell(player, LINE, f=False)
 
                 for n, line in enumerate(rules):
@@ -452,15 +434,24 @@ class notifier:
     def players_list_CMD(self, player, cmd, args):
         ''' Players List command function '''
 
-        active = self.activelist()
+        active = [i for i in self.activelist() if not (PLUGIN['HIDE ADMINS'] and i.IsAdmin()) or player.IsAdmin()]
 
-        title = '%s <%s>%s<end>:' % (self.prefix if self.prefix else '', COLOR['BOARDS TITLE'], MSG['PLAYERS LIST TITLE'])
+        title = '%s <%s>%s<end>:' % (self.prefix, COLOR['BOARDS TITLE'], MSG['PLAYERS LIST TITLE'])
 
-        # Show list on chat?
         if PLUGIN['PLAYERS LIST ON CHAT']:
 
-            # Divide names in chunks before sending to chat
-            names = [self.cache[self.playerid(i)]['username'] for i in active]
+            names = []
+
+            for i in active:
+
+                try:
+
+                    uid = self.playerid(i)
+
+                    if len(uid) == 17: names.append('<lime>%s<end>' % self.players[uid]['username'])
+
+                except: pass
+
             names = [names[i:i+3] for i in xrange(0, len(names), 3)]
 
             self.tell(player, title, f=False)
@@ -475,21 +466,23 @@ class notifier:
             self.tell(player, LINE, f=False)
             self.tell(player, '(%s)' % MSG['CHECK CONSOLE'], 'orange', f=False)
 
-            self.pcon(player, LINE)
-            self.pcon(player, title)
-            self.pcon(player, LINE)
+            for i in (LINE, title, LINE): self.pcon(player, i)
 
             inv = {v: k for k, v in self.countries.items()}
 
             for n, ply in enumerate(active):
 
-                i = self.cache[self.playerid(ply)]
+                try:
 
-                self.pcon(player, '<orange>{num}<end> | {steamid}| {countryshort} | <lime>{username}<end>'.format(
-                    num='%03d' % (n + 1),
-                    countryshort=inv[i['country']],
-                    **i
-                ), 'white')
+                    i = self.players[self.playerid(ply)]
+
+                    self.pcon(player, '<orange>{num}<end> | {steamid} | {countryshort} | <lime>{username}<end>'.format(
+                        num='%03d' % (n + 1),
+                        countryshort=inv[i['country']],
+                        **i
+                    ), 'white')
+
+                except: pass
 
             self.pcon(player, LINE)
             self.pcon(player, MSG['PLAYERS ONLINE'].format(active=str(len(active)), maxplayers=sv.maxplayers), 'orange')
@@ -499,31 +492,32 @@ class notifier:
     def players_online_CMD(self, player, cmd, args):
         ''' Player Online command function '''
 
-        active = self.activelist()
-        sleepers = self.sleeperlist()
+        active = len(self.activelist())
+        admins = len([i for i in self.activelist() if i.IsAdmin()])
+        sleepers = len(self.sleeperlist())
 
-        self.tell(player, '%s <%s>%s<end>:' % (self.prefix if self.prefix else '', COLOR['BOARDS TITLE'], MSG['PLAYERS ONLINE TITLE']), f=False)
+        a = active - admins if not player.IsAdmin() and PLUGIN['HIDE ADMINS'] else active
+
+        self.tell(player, '%s <%s>%s<end>:' % (self.prefix, COLOR['BOARDS TITLE'], MSG['PLAYERS ONLINE TITLE']), f=False)
         self.tell(player, LINE, f=False)
-        self.tell(player, MSG['PLAYERS ONLINE'].format(active=str(len(active)), maxplayers=str(sv.maxplayers)), f=False)
+        self.tell(player, MSG['PLAYERS ONLINE'].format(active=str(a), maxplayers=str(sv.maxplayers)), f=False)
 
-        if not PLUGIN['HIDE ADMINS']:
+        if player.IsAdmin() or not PLUGIN['HIDE ADMINS']:
 
-            admins = [i for i in active if i.IsAdmin()]
+            self.tell(player, MSG['ADMINS ONLINE'].format(admins=str(admins)), f=False)
 
-            self.tell(player, MSG['ADMINS ONLINE'].format(admins=str(len(admins))), f=False)
+        self.tell(player, MSG['PLAYERS STATS'].format(sleepers=str(sleepers), alltime=str(active + sleepers)), f=False)
 
-        self.tell(player, MSG['PLAYERS STATS'].format(sleepers=str(len(sleepers)), alltime=str(len(active) + len(sleepers))), f=False)
-
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def admins_list_CMD(self, player, cmd, args):
         ''' Admins List command function '''
 
-        names = [self.cache[self.playerid(i)]['username'] for i in self.activelist() if i.IsAdmin()]
+        names = [self.players[self.playerid(i)]['username'] for i in self.activelist() if i.IsAdmin()]
         names = [names[i:i+3] for i in xrange(0, len(names), 3)]
 
         if names and not PLUGIN['HIDE ADMINS'] or player.IsAdmin():
 
-            self.tell(player, '%s <%s>%s<end>:' % (self.prefix if self.prefix else '', COLOR['BOARDS TITLE'], MSG['ADMINS LIST TITLE']), f=False)
+            self.tell(player, '%s <%s>%s<end>:' % (self.prefix, COLOR['BOARDS TITLE'], MSG['ADMINS LIST TITLE']), f=False)
             self.tell(player, LINE, f=False)
 
             for i in names: self.tell(player, ', '.join(i), 'white', f=False)
@@ -534,22 +528,22 @@ class notifier:
     def plugins_list_CMD(self, player, cmd, args):
         ''' Plugins List command function '''
 
-        self.tell(player, '%s <%s>%s<end>:' % (self.prefix if self.prefix else '', COLOR['BOARDS TITLE'], MSG['PLUGINS LIST TITLE']), f=False)
+        self.tell(player, '%s <%s>%s<end>:' % (self.prefix, COLOR['BOARDS TITLE'], MSG['PLUGINS LIST TITLE']), f=False)
         self.tell(player, LINE, f=False)
 
         for i in plugins.GetAll():
 
             if i.Author != 'Oxide Team':
                 
-                self.tell(player, '<lime>{plugin.Title}<end> <grey>v{plugin.Version}<end> by {plugin.Author}'.format(plugin=i), f=False)
+                self.tell(player, '<lime>{p.Title}<end> <grey>v{p.Version}<end> by {p.Author}'.format(p=i), f=False)
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def map_link_CMD(self, player, cmd, args):
         ''' Server Map command function '''
 
         self.tell(player, MSG['MAP LINK'].format(ip=str(sv.ip), port=str(sv.port)))
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def adverts_command_CMD(self, player, cmd, args):
         ''' Adverts Command command function '''
 
@@ -576,13 +570,13 @@ class notifier:
 
         else: self.tell(player, MSG['SYNTAX ERROR'].format(syntax='/adverts <minutes> (i.g /adverts 5)'), 'red')
 
-    # --------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
     def plugin_CMD(self, player, cmd, args):
         ''' Plugin command function '''
 
         if args and args[0] == 'help':
 
-            self.tell(player, '%sCOMMANDS DESCRIPTION:' % ('%s | ' % self.prefix if self.prefix else ''), f=False)
+            self.tell(player, '%sCOMMANDS DESCRIPTION:' % ('%s | ' % self.prefix), f=False)
             self.tell(player, LINE, f=False)
 
             for cmd in CMDS:
@@ -615,9 +609,7 @@ class notifier:
 
                 return '<#ADFF64>%s<end>' % con.username
 
-            else:
-
-                return '<#6496E1>%s<end>' % con.username
+            else: return '<#6496E1>%s<end>' % con.username
 
         else: return con.username
 
@@ -640,7 +632,7 @@ class notifier:
         elif default == 'AUTO':
 
             inv = {v: k for k, v in self.countries.items()}
-            lang = inv[self.cache[self.playerid(player)]['country']]
+            lang = inv[self.players[self.playerid(player)]['country']]
 
             if lang in ('PT','BR'): lang = 'PT'
             elif lang in ('ES','MX','AR'): lang = 'ES'
@@ -678,7 +670,7 @@ class notifier:
 
             uid = rust.UserIDFromConnection(con)
 
-            self.cache[uid] = {
+            self.players[uid] = {
                 'username': self.playername(con),
                 'steamid': uid,
                 'auth': con.authLevel,
@@ -697,28 +689,21 @@ class notifier:
 
         def response_handler(code, response):
 
-            # Webrequest response
             country = response.replace('\n','')
 
             if country == 'undefined' or code != 200: country = 'Unknown'
 
-            # Cache player country output
             uid = self.playerid(player)
-            self.cache[uid]['country'] = self.countries[country]
+            self.players[uid]['country'] = self.countries[country]
 
             if send:
 
-                # Join Message
-                if PLUGIN['ENABLE JOIN MESSAGE']:
+                if PLUGIN['ENABLE JOIN MESSAGE'] and not (PLUGIN['HIDE ADMINS'] and player.IsAdmin()):
 
-                    if not (PLUGIN['HIDE ADMINS'] and int(self.cache[uid]['auth']) > 0):
+                    self.say(MSG['JOIN MESSAGE'].format(**self.players[uid]), COLOR['JOIN MESSAGE'], uid)
 
-                        self.say(MSG['JOIN MESSAGE'].format(**self.cache[uid]), COLOR['JOIN MESSAGE'], uid)
+                self.log('connections', '{username} connected from {country} [UID: {steamid}][IP: {ip}]'.format(**self.players[uid]))
 
-                # Log player connection to file
-                self.log('connections', '{username} connected from {country} [UID: {steamid}][IP: {ip}]'.format(**self.cache[uid]))
-
-                # Welcome Messages
                 if PLUGIN['ENABLE WELCOME MESSAGE']:
 
                     lines = self.Config['WELCOME MESSAGE']
@@ -729,7 +714,7 @@ class notifier:
 
                         for line in lines:
 
-                            line = line.format(server=sv, **self.cache[uid])
+                            line = line.format(server=sv, **self.players[uid])
 
                             self.tell(player, line, COLOR['WELCOME MESSAGE'], f=False)
 
@@ -762,14 +747,21 @@ class notifier:
 
             try:
 
-                self.say(ADVERTS[index].format(
-                    players= len(self.activelist()),
-                    sleepers=len(self.sleeperlist()),
-                    localtime=time.strftime('%H:%M %p'),
-                    localdate=time.strftime('%m/%d/%Y'),
-                    gametime=' '.join(str(TOD_Sky.Instance.Cycle.DateTime).split(' ')[1:]),
-                    server=sv),
-                COLOR['ADVERTS'])
+                if random.Range(1, 1000) == 1:
+
+                    self.say('<silver>Who the hell is <purple>SAM?<end><end>', COLOR['ADVERTS'])
+
+                else:
+
+                    self.say(ADVERTS[index].format(
+                        players= len(self.activelist()),
+                        sleepers=len(self.sleeperlist()),
+                        localtime=time.strftime('%H:%M %p'),
+                        localdate=time.strftime('%m/%d/%Y'),
+                        gametime=' '.join(str(TOD_Sky.Instance.Cycle.DateTime).split()[1:]),
+                        gamedate=str(TOD_Sky.Instance.Cycle.DateTime).split()[0],
+                        server=sv),
+                    COLOR['ADVERTS'])
 
             except:
 
@@ -806,7 +798,8 @@ class notifier:
             text = text.replace('<%s>' % end, '</color>')
             for f in (name, hexcode):
                 for c in re.findall(f, text):
-                    if c.startswith('#') or c in colors: text = text.replace('<%s>' % c, '<color=%s>' % c)
+                    if c.startswith('#') or c in colors:
+                        text = text.replace('<%s>' % c, '<color=%s>' % c)
         return text
 
     # -------------------------------------------------------------------------

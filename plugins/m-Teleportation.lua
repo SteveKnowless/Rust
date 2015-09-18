@@ -1,6 +1,6 @@
 PLUGIN.Title       = "Teleportation System"
 PLUGIN.Description = "Multiple teleportation systems for admins and players."
-PLUGIN.Version     = V(1, 4, 17)
+PLUGIN.Version     = V(1, 4, 18)
 PLUGIN.Author      = "Mughisi"
 PLUGIN.ResourceId  = 660
 
@@ -17,8 +17,8 @@ local TeleportData      = {}
 
 local FriendsAPI        = nil
 
-local OverlapSphere     = UnityEngine.Physics.OverlapSphere.methodarray[1]
-local RaycastAll        = UnityEngine.Physics.RaycastAll["methodarray"][5]
+local OverlapSphere     = UnityEngine.Physics.OverlapSphere.methodarray[2]
+local RaycastAll        = UnityEngine.Physics.RaycastAll["methodarray"][7]
 
 local LastPositionValue = global.BasePlayer._type:GetField("lastPositionValue", rust.PrivateBindingFlag()) 
 
