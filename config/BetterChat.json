@@ -32,31 +32,31 @@
   "proveteran": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "#8B0000",
+    "NameColor": "lime",
     "Permission": "color_proveteran",
     "Rank": 1,
     "TextColor": "white",
     "Title": "ΞHunterΞ",
-    "TitleColor": "#8B0000"
+    "TitleColor": "#lime"
   },
   "veteran": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "#c16161",
+    "NameColor": "#b9d3ee",
     "Permission": "color_veteran",
     "Rank": 1,
     "TextColor": "white",
     "Title": "ΞScavengerΞ",
-    "TitleColor": "#c16161"
+    "TitleColor": "#b9d3ee"
   },
   "player": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "lime",
+    "NameColor": "#eecbad",
     "Permission": "color_player",
     "Rank": 1,
     "TextColor": "white",
     "Title": "ΞRefugeeΞ",
-    "TitleColor": "lime"
+    "TitleColor": "#eecbad"
   }
 }
