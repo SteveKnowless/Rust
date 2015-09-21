@@ -1,4 +1,14 @@
 {
+  "donator": {
+    "ConsoleFormatting": "{Title} {Name}: {Message}",
+    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
+    "NameColor": "#FF0000",
+    "Permission": "color_donator",
+    "Rank": 1,
+    "TextColor": "white",
+    "Title": "∞Donator∞",
+    "TitleColor": "#FF0000"
+  },
   "mod": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
@@ -19,44 +29,42 @@
     "Title": "<OverLord>",
     "TitleColor": "black"
   },
-  "donator": {
-    "ConsoleFormatting": "{Title} {Name}: {Message}",
-    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "#FF0000",
-    "Permission": "color_donator",
-    "Rank": 1,
-    "TextColor": "white",
-    "Title": "∞Donator∞",
-    "TitleColor": "#FF0000"
-  },
-  "proveteran": {
-    "ConsoleFormatting": "{Title} {Name}: {Message}",
-    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "lime",
-    "Permission": "color_proveteran",
-    "Rank": 1,
-    "TextColor": "white",
-    "Title": "ΞHunterΞ",
-    "TitleColor": "#lime"
-  },
-  "veteran": {
-    "ConsoleFormatting": "{Title} {Name}: {Message}",
-    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "#b9d3ee",
-    "Permission": "color_veteran",
-    "Rank": 1,
-    "TextColor": "white",
-    "Title": "ΞScavengerΞ",
-    "TitleColor": "#b9d3ee"
-  },
   "player": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "#eecbad",
+    "NameColor": "lime",
     "Permission": "color_player",
     "Rank": 1,
     "TextColor": "white",
     "Title": "ΞRefugeeΞ",
-    "TitleColor": "#eecbad"
+    "TitleColor": "lime"
+  },
+  "proveteran": {
+    "ConsoleFormatting": "{Title} {Name}: {Message}",
+    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
+    "NameColor": "#8B0000",
+    "Permission": "color_proveteran",
+    "Rank": 1,
+    "TextColor": "white",
+    "Title": "ΞHunterΞ",
+    "TitleColor": "#8B0000"
+  },
+  "veteran": {
+    "ConsoleFormatting": "{Title} {Name}: {Message}",
+    "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
+    "NameColor": "#c16161",
+    "Permission": "color_veteran",
+    "Rank": 1,
+    "TextColor": "white",
+    "Title": "ΞScavengerΞ",
+    "TitleColor": "#c16161"
+  },
+  "WordFilter": {
+    "Enabled": false,
+    "FilterList": [
+      "fuck",
+      "bitch",
+      "faggot"
+    ]
   }
 }

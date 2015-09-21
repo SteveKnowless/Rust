@@ -16,7 +16,7 @@ class notifier:
     def __init__(self):
 
         self.Title = 'Notifier'
-        self.Version = V(2, 13, 5)
+        self.Version = V(2, 13, 7)
         self.Author = 'SkinN'
         self.Description = 'Broadcasts chat messages as notifications and advertising.'
         self.ResourceId = 797
@@ -248,7 +248,7 @@ class notifier:
 
         rust.BroadcastChat(msg, None, PROFILE if not profile else profile)
 
-        self.con(self.format(text, True))
+        self.con(text)
 
     # -------------------------------------------------------------------------
     def tell(self, player, text, color='silver', f=True, profile=False):
@@ -271,7 +271,7 @@ class notifier:
             try:
 
                 filename = 'notifier_%s_%s.txt' % (filename, self.log_date())
-                sv.Log('oxide/logs/%s' % filename, text)
+                sv.Log('oxide/logs/%s' % filename, self.format(text, True))
 
             except:
 

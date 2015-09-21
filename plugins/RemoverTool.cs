@@ -9,7 +9,7 @@ using Oxide.Core.Plugins;
 
 namespace Oxide.Plugins
 {
-    [Info("RemoverTool", "Reneb", "3.0.4", ResourceId = 651)]
+    [Info("RemoverTool", "Reneb", "3.0.5", ResourceId = 651)]
     class RemoverTool : RustPlugin
     {
 
@@ -55,14 +55,19 @@ namespace Oxide.Plugins
         }
 
         private static Dictionary<string, string> displaynameToShortname = new Dictionary<string, string>();
+        private static Dictionary<string, int> deployedToItem = new Dictionary<string, int>();
         private void InitializeTable()
         {
             displaynameToShortname.Clear();
+            deployedToItem.Clear();
             List<ItemDefinition> ItemsDefinition = ItemManager.GetItemDefinitions() as List<ItemDefinition>;
             foreach (ItemDefinition itemdef in ItemsDefinition)
             {
                 displaynameToShortname.Add(itemdef.displayName.english.ToString().ToLower(), itemdef.shortname.ToString());
+                if(itemdef.GetComponent<ItemModDeployable>()!=null) deployedToItem.Add(itemdef.GetComponent<ItemModDeployable>().entityPrefab.resourcePath, itemdef.itemid);
             }
+
+            
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -652,11 +657,11 @@ namespace Oxide.Plugins
         static void Refund(BasePlayer player, BaseEntity entity, RemoveType removeType)
         {
             if (removeType == RemoveType.All) return;
-            if (refundDeployable && entity is WorldItem)
+            if (refundDeployable && entity.GetComponentInParent<Deployable>() != null)
             {
-                WorldItem worlditem = entity as WorldItem;
-                if (worlditem.item != null && worlditem.item.info != null)
-                    player.inventory.GiveItem(worlditem.item.info.itemid, 1, true);
+                Deployable worlditem = entity.GetComponentInParent<Deployable>();
+                if(deployedToItem.ContainsKey(worlditem.gameObject.name))
+                    player.inventory.GiveItem(deployedToItem[worlditem.gameObject.name], 1, true);
             }
             else if (refundStructure && entity is BuildingBlock)
             {
@@ -664,16 +669,13 @@ namespace Oxide.Plugins
                 if (buildingblock.blockDefinition == null) return;
 
                 int buildingblockGrade = (int)buildingblock.grade;
-                for (int i = buildingblockGrade; i >= 0; i--)
+                if (buildingblock.blockDefinition.grades[buildingblockGrade] != null && refundPercentage.ContainsKey(buildingblockGrade.ToString()))
                 {
-                    if (buildingblock.blockDefinition.grades[i] != null && refundPercentage.ContainsKey(i.ToString()))
+                    decimal refundRate = decimal.Parse((string)refundPercentage[buildingblockGrade.ToString()]) / 100.0m;
+                    List<ItemAmount> currentCost = buildingblock.blockDefinition.grades[buildingblockGrade].costToBuild as List<ItemAmount>;
+                    foreach (ItemAmount ia in currentCost)
                     {
-                        decimal refundRate = decimal.Parse((string)refundPercentage[i.ToString()]) / 100.0m;
-                        List<ItemAmount> currentCost = buildingblock.blockDefinition.grades[i].costToBuild as List<ItemAmount>;
-                        foreach (ItemAmount ia in currentCost)
-                        {
-                            player.inventory.GiveItem(ia.itemid, Convert.ToInt32((decimal)ia.amount * refundRate), true);
-                        }
+                        player.inventory.GiveItem(ia.itemid, Convert.ToInt32((decimal)ia.amount * refundRate), true);
                     }
                 }
             }

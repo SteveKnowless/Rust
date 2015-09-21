@@ -14,7 +14,7 @@ class radline:
         self.Title = 'RAD-Line'
         self.Author = 'SkinN'
         self.Description = 'Turns off radiation for a while from time to time'
-        self.Version = V(2, 0, 0)
+        self.Version = V(2, 0, 2)
         self.ResourceId = 914
 
     # -------------------------------------------------------------------------
@@ -118,6 +118,7 @@ class radline:
 
         self.con('* Starting event loop (Interval: %d.%d minute/s)' % divmod(PLUGIN['RAD INTERVAL'] * 60, 60))
 
+        sv.radiation = True
         self.loop(True)
 
         command.AddChatCommand('rad', self.Plugin, 'rad_CMD')

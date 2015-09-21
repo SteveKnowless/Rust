@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Oxide.Plugins
 {
-    [Info("Death Notes", "LaserHydra", "3.3.41", ResourceId = 819)]
+    [Info("Death Notes", "LaserHydra", "3.3.71", ResourceId = 819)]
     [Description("Broadcasts players/animals deaths to chat")]
     class DeathNotes : RustPlugin
     {
@@ -24,6 +24,7 @@ namespace Oxide.Plugins
 		List<string> playerDamageTypes = new List<string>();
 		List<string> barricadeDamageTypes = new List<string>();
 		List<string> traps = new List<string>();
+		Dictionary<BasePlayer, HitInfo> lastHitInfo = new Dictionary<BasePlayer, HitInfo>();
 		
 		[PluginReference]
         Plugin PopupNotifications;
@@ -56,12 +57,12 @@ namespace Oxide.Plugins
 			
             LoadDefaultConfig();
 			
-			if(!PopupNotifications)
+			if(PopupNotifications == null && (bool) Config["Settings", "UsePopupNotifications"])
 			{
-				Puts("Popup Notifications can only be used if PopupNotifications is installed! Get it here: http://oxidemod.org/plugins/popup-notifications.1252/");
+				Puts("Popup Notifications can only be used if the PopupNotifications plugin is installed! Get it here: http://oxidemod.org/plugins/popup-notifications.1252/");
 			}
 			
-			prefix = "<color=" + Config["Colors", "Prefix"].ToString() + ">" + Config["Settings", "Prefix"].ToString() + "</color> ";
+			prefix = "<color=" + Config["Colors", "Prefix"].ToString() + ">" + Config["Settings", "Prefix"].ToString() + "</color>";
 			if((bool)Config["Settings", "EnablePluginIcon"]) profile = "76561198206240711";
 			metabolism = "Drowned Heat Cold Thirst Poison Hunger Radiation Bleeding Fall Generic".Split(' ').ToList();
 			playerDamageTypes = "Slash Blunt Stab Bullet".Split(' ').ToList();
@@ -72,8 +73,9 @@ namespace Oxide.Plugins
         protected override void LoadDefaultConfig()
         {
             //  Settings
-            StringConfig("Settings", "Prefix", "DEATH NOTES<color=white>:</color>");
+            StringConfig("Settings", "Prefix", "DEATH NOTES<color=white>:</color> ");
             BoolConfig("Settings", "BroadcastToConsole", true);
+			BoolConfig("Settings", "BroadcastToChat", true);
 			BoolConfig("Settings", "UsePopupNotifications", false);
             BoolConfig("Settings", "ShowSuicides", true);
             BoolConfig("Settings", "ShowMetabolismDeaths", true);
@@ -115,7 +117,7 @@ namespace Oxide.Plugins
             MessageConfig("Fall", new List<string>{"{victim} fell to his death."});
             MessageConfig("Bleeding", new List<string>{"{victim} bled to death."});
             MessageConfig("Explosion", new List<string>{"{victim} got blown up."});
-            MessageConfig("Poision", new List<string>{"{victim} died by poison."});
+            MessageConfig("Poison", new List<string>{"{victim} died by poison."});
             MessageConfig("Suicide", new List<string>{"{victim} committed suicide."});
             MessageConfig("Generic", new List<string>{"{victim} died."});
 			MessageConfig("Unknown", new List<string>{"{victim} died by an unknown reason."});
@@ -134,7 +136,21 @@ namespace Oxide.Plugins
             MessageConfig("Bite", new List<string>{"A {attacker} killed {victim}."});
             MessageConfig("BiteSleep", new List<string>{"A {attacker} killed {victim}, while he slept."});
             MessageConfig("AnimalDeath", new List<string>{"{attacker} killed a {victim} with a {weapon} from {distance}m."});
+			MessageConfig("Helicopter", new List<string>{"{victim} was killed by a Patrol Helicopter."});
+			MessageConfig("UnknownExplosion", new List<string>{"{victim} got blown up somehow."});
         }
+		
+		void OnPlayerDisconnected(BasePlayer player)
+		{
+			if(lastHitInfo.ContainsKey(player)) lastHitInfo.Remove(player);
+		}
+		
+		void OnEntityTakeDamage(BaseCombatEntity vic, HitInfo hitInfo)
+		{
+			if(vic == null || hitInfo == null || vic.ToPlayer() == null) return;
+			
+			lastHitInfo[vic.ToPlayer()] = hitInfo;
+		}
 		
         void OnEntityDeath(BaseCombatEntity vic, HitInfo hitInfo)
         {
@@ -159,13 +175,14 @@ namespace Oxide.Plugins
 			codeLocation = "OnEntityDeath Beginning | Main: Declaration";
 			DebugMessage("AT: " + codeLocation);
 			try
-			{
-				if(hitInfo == null) return;
-				
+			{		
 				dmg = FirstUpper(vic.lastDamage.ToString() ?? "Unknown");
 				if((bool) string.IsNullOrEmpty(dmg)) dmg = "Unknown";
 				
-				bodypart = StringPool.Get(hitInfo.HitBone) ?? "Unknown";
+				if(hitInfo == null && vic != null && vic.ToPlayer() != null && lastHitInfo.ContainsKey(vic.ToPlayer())) hitInfo = lastHitInfo[vic.ToPlayer()];
+				if(hitInfo == null && metabolism.Contains(dmg) == false && dmg != "Explosion") return;
+				
+				bodypart = StringPool.Get(Convert.ToUInt32(hitInfo?.HitBone)) ?? "Unknown";
 				if((bool) string.IsNullOrEmpty(bodypart)) bodypart = "Unknown";
 			}
 			catch(Exception ex)
@@ -175,24 +192,24 @@ namespace Oxide.Plugins
 			}
 			
 			//	OnEntityDeath Beginning | Main: Getting Attacker
-			codeLocation = "OnEntityDeath End | Message: Sending & New2Config";
+			codeLocation = "OnEntityDeath Beginning | Main: Getting Attacker";
 			DebugMessage("AT: " + codeLocation);
 			try
 			{
-				if(hitInfo.Initiator != null)
+				if(hitInfo?.Initiator != null)
 				{
-					if(hitInfo.Initiator.ToPlayer() != null)
+					if(hitInfo?.Initiator?.ToPlayer() != null)
 					{
-						attacker = hitInfo.Initiator.ToPlayer().displayName;
+						attacker = hitInfo?.Initiator?.ToPlayer().displayName ?? "Unknown";
 					}
 					else
 					{
-						attacker = FirstUpper(hitInfo.Initiator.LookupShortPrefabName());
+						attacker = FirstUpper(hitInfo?.Initiator?.LookupShortPrefabName() ?? "Unknown");
 					}
 				}
 				else
 				{
-					attacker = "None";
+					attacker = "Unknown";
 				}
 			}
 			catch (Exception ex)
@@ -212,60 +229,93 @@ namespace Oxide.Plugins
 			DebugMessage("AT: " + codeLocation);
 			try
 			{
+				DebugMessage("Checking victim & Death Type");
 				if(!vic.ToString().Contains("corpse"))
 				{
+					DebugMessage("Victim is not a corpse!");
 					if(vic != null)
 					{
+						DebugMessage("Victim is NOT null!");
 						if(vic.ToPlayer() != null)
 						{
+							DebugMessage("Victim is player!");
 							victim = vic.ToPlayer().displayName;
+							DebugMessage("Victim player is called " + victim);
 							sleeping = (bool)vic.ToPlayer().IsSleeping();
 							
 							//	Is it Suicide or Metabolism?
-							if(dmg == "Suicide" && (bool)Config["Settings", "ShowSuicides"]) msg = dmg;
-							if(metabolism.Contains(dmg) && (bool)Config["Settings", "ShowMetabolismDeaths"]) msg = dmg;
+							if(dmg == "Suicide" && (bool)Config["Settings", "ShowSuicides"])
+							{
+								msg = dmg;
+								DebugMessage("Death by suicide");
+							}
+							if(metabolism.Contains(dmg) && (bool)Config["Settings", "ShowMetabolismDeaths"])
+							{
+								msg = dmg;
+								DebugMessage("Death by metabolism");
+							}
 							
-							//	Is Attacker a Player?
-							if(hitInfo.Initiator != null && hitInfo.Initiator.ToPlayer() != null && playerDamageTypes.Contains(dmg) && hitInfo.WeaponPrefab.ToString().Contains("grenade") == false && hitInfo.WeaponPrefab.ToString().Contains("survey") == false)
+							if(hitInfo != null)
 							{
-								if(hitInfo.WeaponPrefab.ToString().Contains("hunting") || hitInfo.WeaponPrefab.ToString().Contains("bow"))
+								//	Is Attacker a Player?
+								if(hitInfo.Initiator != null && hitInfo.Initiator.ToPlayer() != null && playerDamageTypes.Contains(dmg) && hitInfo.WeaponPrefab.ToString().Contains("grenade") == false && hitInfo.WeaponPrefab.ToString().Contains("survey") == false)
 								{
-									if(sleeping) msg = "ArrowSleep";
-									else msg = "Arrow";
+									DebugMessage("Death by player");
+									if(hitInfo.WeaponPrefab.ToString().Contains("hunting") || hitInfo.WeaponPrefab.ToString().Contains("bow"))
+									{
+										if(sleeping) msg = "ArrowSleep";
+										else msg = "Arrow";
+									}
+									else
+									{
+										if(sleeping) msg = dmg + "Sleep";
+										else msg = dmg;
+									}
 								}
-								else
+								//	Is Attacker a known explosive?
+								else if(hitInfo.WeaponPrefab != null || dmg == "Explosion" && (bool)Config["Settings", "ShowExplosionDeaths"])
 								{
-									if(sleeping) msg = dmg + "Sleep";
-									else msg = dmg;
+									DebugMessage("Death by known explosion");
+									if(hitInfo.WeaponPrefab?.ToString().Contains("grenade") == true || hitInfo.WeaponPrefab?.ToString().Contains("survey") == true)
+									{
+										msg = "Explosion";
+									}
+									else 
+									{
+										msg = "UnknownExplosion";
+									}
+								}
+								//	Is Attacker a trap?
+								else if(traps.Contains(attacker) && (bool)Config["Settings", "ShowTrapDeaths"])
+								{
+									DebugMessage("Death by trap");
+									msg = "Trap";
+								}
+								//	Is Attacker a Barricade?
+								else if(barricadeDamageTypes.Contains(dmg) && (bool)Config["Settings", "ShowBarricadeDeaths"])
+								{
+									DebugMessage("Death by barricade");
+									msg = "Barricade";
+								}
+								//	Is Attacker an Animal?
+								else if(dmg == "Bite" && (bool)Config["Settings", "ShowAnimalKills"])
+								{
+									DebugMessage("Death by animal");
+									if(sleeping) msg = "BiteSleep";
+									else msg = "Bite";
 								}
 							}
-							//	Is Attacker an explosive?
-							else if(hitInfo.WeaponPrefab != null || dmg == "Explosion" && (bool)Config["Settings", "ShowExplosionDeaths"])
+							//	Is Attacker a unknown explosive?
+							else if(hitInfo == null && dmg == "Explosion" && (bool)Config["Settings", "ShowExplosionDeaths"])
 							{
-								if(hitInfo.WeaponPrefab.ToString().Contains("grenade") == false && hitInfo.WeaponPrefab.ToString().Contains("survey") == false && dmg != "Explosion") return;
-							
-								msg = "Explosion";
-							}
-							//	Is Attacker a trap?
-							else if(traps.Contains(attacker) && (bool)Config["Settings", "ShowTrapDeaths"])
-							{
-								msg = "Trap";
-							}
-							//	Is Attacker a Barricade?
-							else if(barricadeDamageTypes.Contains(dmg) && (bool)Config["Settings", "ShowBarricadeDeaths"])
-							{
-								msg = "Barricade";
-							}
-							//	Is Attacker an Animal?
-							else if(dmg == "Bite" && (bool)Config["Settings", "ShowAnimalKills"])
-							{
-								if(sleeping) msg = "BiteSleep";
-								else msg = "Bite";
+								DebugMessage("Death by unknown explosion");
+								msg = "UnknownExplosion";
 							}
 						}
 						//	Victim is an Animal
 						else if(vic.ToString().Contains("animals") && (bool)Config["Settings", "ShowAnimalDeaths"])
 						{
+							DebugMessage("Victim is animal!");
 							victim = FirstUpper(vic.LookupShortPrefabName());	
 							msg = "AnimalDeath";
 							if(dmg == "Explosion") msg = "Explosion";
@@ -293,19 +343,21 @@ namespace Oxide.Plugins
 				DebugMessage("AT: " + codeLocation);
 				try
 				{
-					weapon = hitInfo?.Weapon?.GetItem().info?.displayName?.english?.ToString();
+					weapon = hitInfo?.Weapon?.GetItem().info?.displayName?.english?.ToString() ?? "Unknown";
 					if(weapon != null && weapon.Contains("Semi-Automatic Pistol")) weapon = "Semi-Automatic Pistol";
 					
-					if (hitInfo.Weapon?.GetItem()?.contents?.itemList != null)
+					if (hitInfo?.Weapon?.GetItem()?.contents?.itemList != null)
 					{
 						List<string> contents = new List<string>();
-						foreach (var content in hitInfo.Weapon.GetItem().contents.itemList)
+						foreach (var content in hitInfo?.Weapon?.GetItem().contents?.itemList as List<Item>)
 						{
-							contents.Add(content.info.displayName.english);
+							contents.Add(content?.info?.displayName?.english);
 						}
 						
-						attachments = ArrayToString(contents.ToArray(), 0, " | ");
+						attachments = ArrayToString(contents?.ToArray(), 0, " | ");
 					}
+					
+					if(string.IsNullOrEmpty(attachments)) attachments = "Unknown";
 				}
 				catch(Exception ex)
 				{
@@ -333,16 +385,16 @@ namespace Oxide.Plugins
 				DebugMessage("AT: " + codeLocation);
 				try
 				{
-					if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("f1")) weapon = "F1 Grenade";
-					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("beancan")) weapon = "Beancan Grenade";
-					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("timed")) weapon = "Timed Explosive Charge";
-					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("rocket")) weapon = "Rocket Launcher";
-					else if(hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("survey")) weapon = "Survey Charge";
+					if(hitInfo != null && hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("f1")) weapon = "F1 Grenade";
+					else if(hitInfo != null && hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("beancan")) weapon = "Beancan Grenade";
+					else if(hitInfo != null && hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("timed")) weapon = "Timed Explosive Charge";
+					else if(hitInfo != null && hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("rocket")) weapon = "Rocket Launcher";
+					else if(hitInfo != null && hitInfo.WeaponPrefab != null && hitInfo.WeaponPrefab.ToString().Contains("survey")) weapon = "Survey Charge";
 					
 					formattedVictim = GetFormattedVictim(victim ?? "Unknown", false);
 					rawVictim = GetFormattedVictim(victim ?? "Unknown", true);
 					
-					if(hitInfo.Initiator != null)
+					if(hitInfo != null && hitInfo.Initiator != null)
 					{
 						if(attachments != "Unknown")
 						{
@@ -365,13 +417,14 @@ namespace Oxide.Plugins
 						rawAttacker = GetFormattedAttacker(attacker ?? "Unknown", true);
 					}
 					
+					if(attacker.Contains("helicopter")) msg = "Helicopter";
 					deathmsg = GetRandomMessage(msg) ?? GetRandomMessage("Unknown");
 					rawmsg = GetRandomMessage(msg) ?? GetRandomMessage("Unknown");
 					
 					deathmsg = deathmsg.Replace("{victim}", formattedVictim);
 					rawmsg = rawmsg.Replace("{victim}", rawVictim);
 					
-					if(hitInfo.Initiator != null)
+					if(hitInfo != null && hitInfo.Initiator != null)
 					{
 						if(msg == "Bite") deathmsg = deathmsg.Replace("{attacker}", formattedAnimal);
 						else deathmsg = deathmsg.Replace("{attacker}", formattedAttacker);
@@ -413,22 +466,31 @@ namespace Oxide.Plugins
 				}
 				
 				if(formattedBodypart != null) deathmsg = deathmsg.Replace("{bodypart}", formattedBodypart);
-				if(hitInfo.Initiator != null) deathmsg = deathmsg.Replace("{distance}", formattedDistance);
-				if(hitInfo.Weapon != null || hitInfo.WeaponPrefab != null) deathmsg = deathmsg.Replace("{weapon}", formattedWeapon);
+				if(hitInfo != null && hitInfo.Initiator != null) deathmsg = deathmsg.Replace("{distance}", formattedDistance);
+				if(hitInfo != null && hitInfo.Weapon != null || hitInfo?.WeaponPrefab != null) deathmsg = deathmsg.Replace("{weapon}", formattedWeapon);
 				
 				if(formattedBodypart != null) rawmsg = rawmsg.Replace("{bodypart}", rawBodypart);
-				if(hitInfo.Initiator != null) rawmsg = rawmsg.Replace("{distance}", GetDistance(vic, hitInfo.Initiator));
-				if(hitInfo.Weapon != null || hitInfo.WeaponPrefab != null) rawmsg = rawmsg.Replace("{weapon}", rawWeapon);
+				if(hitInfo != null && hitInfo.Initiator != null) rawmsg = rawmsg.Replace("{distance}", GetDistance(vic, hitInfo.Initiator));
+				if(hitInfo != null && hitInfo.Weapon != null || hitInfo?.WeaponPrefab != null) rawmsg = rawmsg.Replace("{weapon}", rawWeapon);
 				
 				//	OnEntityDeath End | Message: Sending & New2Config
 				codeLocation = "OnEntityDeath End | Message: Sending & New2Config";
 				DebugMessage("AT: " + codeLocation);
 				try
 				{
+					if(victim == null) DebugMessage("victim == null");
+					if(rawBodypart == null) DebugMessage("rawBodypart == null");
+					if(weapon == null) DebugMessage("weapon == null");
+					if(prefix == null) DebugMessage("prefix == null");
+					if(deathmsg == null) DebugMessage("deathmsg == null");
+					if(rawmsg == null) DebugMessage("rawmsg == null");
+					if(vic == null) DebugMessage("vic == null");
+					DebugMessage("Victim: " + victim);
 					if(victim == "Unknown" && BasePlayer.Find(victim) == null) return;
 					if((bool) string.IsNullOrEmpty(rawBodypart)) rawBodypart = "Unknown";
 					if((bool) string.IsNullOrEmpty(weapon)) weapon = "Unknown";
 					if(msg != "AnimalDeath") AddNewToConfig(rawBodypart, weapon);
+					
 					BroadcastDeath(prefix + GetFormattedMessage(deathmsg), rawmsg, vic);
 				}
 				catch (Exception ex)
@@ -632,7 +694,6 @@ namespace Oxide.Plugins
 
         void BroadcastChat(string prefix, string msg = null)
         {
-
             if (msg != null)
             {
                 PrintToChat("<color=orange>" + prefix + "</color>: " + msg);
@@ -661,14 +722,18 @@ namespace Oxide.Plugins
 		void BroadcastDeath(string deathmessage, string rawmessage, BaseEntity victim)
 		{
 			DebugMessage("Chatmsg: " + deathmessage + ", Rawmsg: " + rawmessage);
-			if((bool)Config["Settings", "MessageInRadius"])
+			
+			if((bool)Config["Settings", "BroadcastToChat"])
 			{
-				foreach(BasePlayer player in BasePlayer.activePlayerList)
+				if((bool)Config["Settings", "MessageInRadius"])
 				{
-					if(Convert.ToInt32(GetDistance(player, victim)) <= (int)Config["Settings", "MessageRadius"]) player.SendConsoleCommand("chat.add", profile, deathmessage, 1.0);
+					foreach(BasePlayer player in BasePlayer.activePlayerList)
+					{
+						if(Convert.ToInt32(GetDistance(player, victim)) <= (int)Config["Settings", "MessageRadius"]) player.SendConsoleCommand("chat.add", profile, deathmessage, 1.0);
+					}
 				}
+				else ConsoleSystem.Broadcast("chat.add", profile, deathmessage, 1.0);
 			}
-			else ConsoleSystem.Broadcast("chat.add", profile, deathmessage, 1.0);
 			
 			if((bool)Config["Settings", "UsePopupNotifications"]) PopupNotifications?.Call("CreatePopupNotification", deathmessage);
 			

@@ -1,58 +1,65 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Linq;
 using System;
 
 namespace Oxide.Plugins
 {
-    [Info("Better Chat", "LaserHydra", "3.0.2", ResourceId = 979)]
+    [Info("Better Chat", "LaserHydra", "3.1.0", ResourceId = 979)]
     [Description("Change colors, formatting, prefix and more of the chat.")]
     class BetterChat : RustPlugin
     {
         void Loaded()
         {
+			LoadDefaultConfig();
+			
             if (!permission.PermissionExists("betterchat.formatting")) permission.RegisterPermission("betterchat.formatting", this);
 
             foreach (var group in Config)
             {
                 string groupName = group.Key;
-
+				if(groupName == "WordFilter") continue;
                 permission.RegisterPermission(Config[groupName, "Permission"].ToString(), this);
 
                 if (groupName == "player") permission.GrantGroupPermission("player", Config[groupName, "Permission"].ToString(), this);
                 else if (groupName == "mod" || groupName == "moderator") permission.GrantGroupPermission("moderator", Config[groupName, "Permission"].ToString(), this);
                 else if (groupName == "owner") permission.GrantGroupPermission("admin", Config[groupName, "Permission"].ToString(), this);
-
-                LoadDefaultConfig();
             }
         }
 
         protected override void LoadDefaultConfig()
         {
-            StringConfig("player", "Formatting", "{Title} {Name}<color={TextColor}>:</color> {Message}");
-            StringConfig("player", "ConsoleFormatting", "{Title} {Name}: {Message}");
-            StringConfig("player", "Permission", "color_player");
-            StringConfig("player", "Title", "[Player]");
-            StringConfig("player", "TitleColor", "lime");
-            StringConfig("player", "NameColor", "lime");
-            StringConfig("player", "TextColor", "white");
-            IntConfig("player", "Rank", 1);
+			SetConfig("WordFilter", "Enabled", false);
+			SetConfig("WordFilter", "FilterList", new List<string>{"fuck", "bitch", "faggot"});
+			
+            SetConfig("player", "Formatting", "{Title} {Name}<color={TextColor}>:</color> {Message}");
+            SetConfig("player", "ConsoleFormatting", "{Title} {Name}: {Message}");
+            SetConfig("player", "Permission", "color_player");
+            SetConfig("player", "Title", "[Player]");
+            SetConfig("player", "TitleColor", "blue");
+            SetConfig("player", "NameColor", "blue");
+            SetConfig("player", "TextColor", "white");
+            SetConfig("player", "Rank", 1);
 
-            StringConfig("mod", "Formatting", "{Title} {Name}<color={TextColor}>:</color> {Message}");
-            StringConfig("mod", "ConsoleFormatting", "{Title} {Name}: {Message}");
-            StringConfig("mod", "Permission", "color_mod");
-            StringConfig("mod", "Title", "[Mod]");
-            StringConfig("mod", "TitleColor", "yellow");
-            StringConfig("mod", "NameColor", "lime");
-            StringConfig("mod", "TextColor", "white");
-            IntConfig("mod", "Rank", 2);
+            SetConfig("mod", "Formatting", "{Title} {Name}<color={TextColor}>:</color> {Message}");
+            SetConfig("mod", "ConsoleFormatting", "{Title} {Name}: {Message}");
+            SetConfig("mod", "Permission", "color_mod");
+            SetConfig("mod", "Title", "[Mod]");
+            SetConfig("mod", "TitleColor", "yellow");
+            SetConfig("mod", "NameColor", "blue");
+            SetConfig("mod", "TextColor", "white");
+            SetConfig("mod", "Rank", 2);
 
-            StringConfig("owner", "Formatting", "{Title} {Name}<color={TextColor}>:</color> {Message}");
-            StringConfig("owner", "ConsoleFormatting", "{Title} {Name}: {Message}");
-            StringConfig("owner", "Permission", "color_owner");
-            StringConfig("owner", "Title", "[Owner]");
-            StringConfig("owner", "TitleColor", "orange");
-            StringConfig("owner", "NameColor", "lime");
-            StringConfig("owner", "TextColor", "white");
-            IntConfig("owner", "Rank", 3);
+            SetConfig("owner", "Formatting", "{Title} {Name}<color={TextColor}>:</color> {Message}");
+            SetConfig("owner", "ConsoleFormatting", "{Title} {Name}: {Message}");
+            SetConfig("owner", "Permission", "color_owner");
+            SetConfig("owner", "Title", "[Owner]");
+            SetConfig("owner", "TitleColor", "red");
+            SetConfig("owner", "NameColor", "blue");
+            SetConfig("owner", "TextColor", "white");
+            SetConfig("owner", "Rank", 3);
+			
+			SaveConfig();
         }
 
         Dictionary<string, string> GetPlayerFormatting(BasePlayer player)
@@ -63,13 +70,16 @@ namespace Oxide.Plugins
             foreach (var group in Config)
             {
                 string groupName = group.Key;
+				
+				if(groupName == "WordFilter") continue;
+				
                 if (permission.UserHasPermission(uid, Config[groupName, "Permission"].ToString()))
                 {
-                    if (Convert.ToInt32(Config[groupName, "Rank"]) > Convert.ToInt32(playerData["GroupRank"]))
+                    if (Convert.ToInt32(Config[groupName, "Rank"].ToString()) > Convert.ToInt32(playerData["GroupRank"].ToString()))
                     {
                         playerData["Formatting"] = Config[groupName, "Formatting"].ToString();
-                        playerData["ConsoleOutput"] = Config[groupName, "ConsoleFormatting"].ToString();
-                        playerData["GroupRank"] = Config[groupName, "GroupRank"].ToString();
+                        playerData["ConsoleFormatting"] = Config[groupName, "ConsoleFormatting"].ToString();
+                        playerData["GroupRank"] = Config[groupName, "Rank"].ToString();
                         playerData["Title"] = Config[groupName, "Title"].ToString();
                         playerData["TitleColor"] = Config[groupName, "TitleColor"].ToString();
                         playerData["NameColor"] = Config[groupName, "NameColor"].ToString();
@@ -80,7 +90,35 @@ namespace Oxide.Plugins
 
             return playerData;
         }
-
+		
+		string GetFilteredMesssage(string msg)
+		{
+			foreach(var word in Config["WordFilter", "FilterList"] as List<object>)
+			{
+				MatchCollection matches = new Regex(@"((?i)(?:\S+)?" + word + @"?\S+)").Matches(msg);
+				
+				foreach(Match match in matches)
+				{
+					
+					if(match.Success)
+					{
+						string found = match.Groups[1].ToString();
+						string replaced = "";
+						
+						for(int i = 0; i < found.Length; i++) replaced = replaced + "*";
+						
+						msg = msg.Replace(found, replaced);
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+			
+			return msg;
+		}
+		
         [ChatCommand("colors")]
         void ColorList(BasePlayer player)
         {
@@ -104,6 +142,7 @@ namespace Oxide.Plugins
         {
             BasePlayer player = (BasePlayer) arg.connection.player;
             string message = arg.GetString(0, "text");
+			if((bool)Config["WordFilter", "Enabled"]) message = GetFilteredMesssage(message);
             string uid = player.userID.ToString();
             var ChatMute = plugins.Find("chatmute");
 
@@ -124,45 +163,27 @@ namespace Oxide.Plugins
                 if (isMuted) return false;
             }
 
-            Dictionary<string, string> playerData = new Dictionary<string, string>();
-            playerData["GroupRank"] = "0";
-            foreach (var group in Config)
-            {
-                string groupName = group.Key.ToString();
-                if (permission.UserHasPermission(uid, Config[groupName, "Permission"].ToString()))
-                {
-                    if (Convert.ToInt32(Config[groupName, "Rank"]) > Convert.ToInt32(playerData["GroupRank"]))
-                    {
-						playerData["Formatting"] = Config[groupName, "Formatting"].ToString();
-                        playerData["ConsoleFormatting"] = Config[groupName, "ConsoleFormatting"].ToString();
-                        playerData["GroupRank"] = Config[groupName, "Rank"].ToString();
-                        playerData["Title"] = Config[groupName, "Title"].ToString();
-                        playerData["TitleColor"] = Config[groupName, "TitleColor"].ToString();
-                        playerData["NameColor"] = Config[groupName, "NameColor"].ToString();
-                        playerData["TextColor"] = Config[groupName, "TextColor"].ToString();
+            Dictionary<string, string> playerData = GetPlayerFormatting(player);
+			
+            playerData["FormattedOutput"] = playerData["Formatting"];
+            playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{Rank}", playerData["GroupRank"]);
+            playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{Title}", "<color=" + playerData["TitleColor"] + ">" + playerData["Title"] + "</color>");
+            playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{TitleColor}", playerData["TitleColor"]);
+            playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{NameColor}", playerData["NameColor"]);
+            playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{TextColor}", playerData["TextColor"]);
+            playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{Name}", "<color=" + playerData["NameColor"] + ">" + player.displayName + "</color>");
+            playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{ID}", player.userID.ToString());
+            playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{Message}", "<color=" + playerData["TextColor"] + ">" + message + "</color>");
 
-                        playerData["FormattedOutput"] = playerData["Formatting"];
-                        playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{Rank}", playerData["GroupRank"]);
-                        playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{Title}", "<color=" + playerData["TitleColor"] + ">" + playerData["Title"] + "</color>");
-                        playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{TitleColor}", playerData["TitleColor"]);
-                        playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{NameColor}", playerData["NameColor"]);
-                        playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{TextColor}", playerData["TextColor"]);
-                        playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{Name}", "<color=" + playerData["NameColor"] + ">" + player.displayName + "</color>");
-                        playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{ID}", player.userID.ToString());
-                        playerData["FormattedOutput"] = playerData["FormattedOutput"].Replace("{Message}", "<color=" + playerData["TextColor"] + ">" + message + "</color>");
-
-                        playerData["ConsoleOutput"] = playerData["ConsoleFormatting"];
-                        playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{Rank}", playerData["GroupRank"]);
-                        playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{Title}", playerData["Title"]);
-                        playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{TitleColor}", playerData["TitleColor"]);
-                        playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{NameColor}", playerData["NameColor"]);
-                        playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{TextColor}", playerData["TextColor"]);
-                        playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{Name}", player.displayName);
-                        playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{ID}", player.userID.ToString());
-                        playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{Message}", message);
-                    }
-                }
-            }
+			playerData["ConsoleOutput"] = playerData["ConsoleFormatting"];
+			playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{Rank}", playerData["GroupRank"]);
+			playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{Title}", playerData["Title"]);
+			playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{TitleColor}", playerData["TitleColor"]);
+			playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{NameColor}", playerData["NameColor"]);
+			playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{TextColor}", playerData["TextColor"]);
+			playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{Name}", player.displayName);
+			playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{ID}", player.userID.ToString());
+			playerData["ConsoleOutput"] = playerData["ConsoleOutput"].Replace("{Message}", message);
 
             ChatSay(playerData["FormattedOutput"], uid);
             Puts(playerData["ConsoleOutput"]);
@@ -172,94 +193,18 @@ namespace Oxide.Plugins
 
 
         #region UsefulMethods
-        //--------------------------->   Player finding   <---------------------------//
-
-        BasePlayer GetPlayer(string searchedPlayer, BasePlayer executer, string prefix)
-        {
-            BasePlayer targetPlayer = null;
-            List<string> foundPlayers = new List<string>();
-            string searchedLower = searchedPlayer.ToLower();
-            foreach (BasePlayer player in BasePlayer.activePlayerList)
-            {
-                string display = player.displayName;
-                string displayLower = display.ToLower();
-
-                if (!displayLower.Contains(searchedLower))
-                {
-                    continue;
-                }
-                if (displayLower.Contains(searchedLower))
-                {
-                    foundPlayers.Add(display);
-                }
-            }
-            var matchingPlayers = foundPlayers.ToArray();
-
-            if (matchingPlayers.Length == 0)
-            {
-                SendChatMessage(executer, prefix, "No matching players found!");
-            }
-
-            if (matchingPlayers.Length > 1)
-            {
-                SendChatMessage(executer, prefix, "Multiple players found:");
-                string multipleUsers = "";
-                foreach (string matchingplayer in matchingPlayers)
-                {
-                    if (multipleUsers == "")
-                    {
-                        multipleUsers = "<color=yellow>" + matchingplayer + "</color>";
-                        continue;
-                    }
-
-                    if (multipleUsers != "")
-                    {
-                        multipleUsers = multipleUsers + ", " + "<color=yellow>" + matchingplayer + "</color>";
-                    }
-
-                }
-                SendChatMessage(executer, prefix, multipleUsers);
-            }
-
-            if (matchingPlayers.Length == 1)
-            {
-                targetPlayer = BasePlayer.Find(matchingPlayers[0]);
-            }
-            return targetPlayer;
-        }
-
         //------------------------------>   Config   <------------------------------//
-
-        void StringConfig(string GroupName, string DataName, string Data)
+		
+		void SetConfig(string GroupName, string DataName, object Data)
         {
-            if (Config[GroupName, DataName] == null) Config[GroupName, DataName] = Data;
-            if (Config[GroupName, DataName].ToString() != Data) return;
-        }
-
-        void IntConfig(string GroupName, string DataName, int Data)
-        {
-            if (Config[GroupName, DataName] == null) Config[GroupName, DataName] = Data;
-            if (Convert.ToInt32(Config[GroupName, DataName]) != Data) return;
+			Config[GroupName, DataName] = Config[GroupName, DataName] ?? Data;
         }
 
         //---------------------------->   Converting   <----------------------------//
 
-        string ArrayToString(string[] array, int first)
+        string ArrayToString(string[] array, int first, string seperator)
         {
-            int count = 0;
-            string output = array[first];
-            foreach (string current in array)
-            {
-                if (count <= first)
-                {
-                    count++;
-                    continue;
-                }
-
-                output = output + " " + current;
-                count++;
-            }
-            return output;
+            return String.Join(seperator, array.Skip(first).ToArray());;
         }
 
         //---------------------------->   Chat Sending   <----------------------------//

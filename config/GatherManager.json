@@ -32,11 +32,11 @@
       "*": 10.0,
       "Bone Fragments": 1.0,
       "High Quality Metal Ore": 1.0,
-      "Sulfur Ore": 2.0
+      "Sulfur Ore": 3.0
     },
     "MiningQuarryResourceTickRate": 2.0,
     "PickupResourceModifiers": {
-      "*": 5.0,
+      "*": 10.0,
       "Mushroom": 2.0
     },
     "QuarryResourceModifiers": {
