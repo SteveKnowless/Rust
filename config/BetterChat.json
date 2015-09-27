@@ -16,48 +16,48 @@
     "Permission": "color_mod",
     "Rank": 2,
     "TextColor": "white",
-    "Title": "₪Diplomat₪",
-    "TitleColor": "#FFC125"
+    "Title": "₪ Diplomat ₪",
+    "TitleColor": "#cd950c"
   },
   "owner": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "#ba0000",
+    "NameColor": "#ff0000",
     "Permission": "color_owner",
     "Rank": 3,
-    "TextColor": "silver",
-    "Title": "<OverLord>",
+    "TextColor": "#bf3eff",
+    "Title": "» OverLord «",
     "TitleColor": "black"
   },
   "player": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "lime",
+    "NameColor": "#eecfa1",
     "Permission": "color_player",
     "Rank": 1,
     "TextColor": "white",
-    "Title": "ΞRefugeeΞ",
-    "TitleColor": "lime"
+    "Title": "Ξ Refugee Ξ",
+    "TitleColor": "#cdb38b"
   },
   "proveteran": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "#8B0000",
+    "NameColor": "lime",
     "Permission": "color_proveteran",
     "Rank": 1,
     "TextColor": "white",
-    "Title": "ΞHunterΞ",
-    "TitleColor": "#8B0000"
+    "Title": "¤ Hunter ¤",
+    "TitleColor": "#00cd00"
   },
   "veteran": {
     "ConsoleFormatting": "{Title} {Name}: {Message}",
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
-    "NameColor": "#c16161",
+    "NameColor": "#63b8ff",
     "Permission": "color_veteran",
     "Rank": 1,
     "TextColor": "white",
-    "Title": "ΞScavengerΞ",
-    "TitleColor": "#c16161"
+    "Title": "ǂ Scavenger ǂ",
+    "TitleColor": "#5cacee"
   },
   "WordFilter": {
     "Enabled": false,
