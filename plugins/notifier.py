@@ -1,5 +1,6 @@
 import re
 import time
+import binascii
 import BasePlayer
 import ConVar.Server as sv
 import TOD_Sky
@@ -7,18 +8,17 @@ import UnityEngine.Random as random
 from System import Action, Int32, String
 
 DEV = False
-LATEST_CFG = 5.3
+LATEST_CFG = 5.5
 LINE = '-' * 50
-PROFILE = '76561198235146288'
 
 class notifier:
 
     def __init__(self):
 
         self.Title = 'Notifier'
-        self.Version = V(2, 13, 7)
+        self.Version = V(2, 14, 0)
         self.Author = 'SkinN'
-        self.Description = 'Broadcasts chat messages as notifications and advertising.'
+        self.Description = 'Server administration tool with chat based notifications'
         self.ResourceId = 797
 
     # -------------------------------------------------------------------------
@@ -36,6 +36,8 @@ class notifier:
                 'PLAYERS LIST ON CHAT': True,
                 'PLAYERS LIST ON CONSOLE': True,
                 'ADVERTS INTERVAL': 6,
+                'ICON PROFILE': '76561198235146288',
+                'ENABLE SCHEDULED MESSAGES': True,
                 'ENABLE PLAYERS DEFAULT COLORS': False,
                 'ENABLE PLUGIN ICON': True,
                 'ENABLE JOIN MESSAGE': True,
@@ -82,6 +84,10 @@ class notifier:
                 '<orange><size=20>•</size><end> Check our server <orange>/rules<end>.',
                 '<orange><size=20>•</size><end> See where you are on the server map at: <lime>http://{server.ip}:{server.port}<end>'
             ),
+            'SCHEDULED MESSAGES': {
+                '00:00': ('It is now <lime>{localtime}<end> of <lime>{localdate}<end>',),
+                '12:00': ('It is now <lime>{localtime}<end> of <lime>{localdate}<end>',)
+            },
             'ADVERTS': (
                 'Want to know the available commands? Type <orange>/help<end>.',
                 'Respect the server <orange>/rules<end>.',
@@ -100,7 +106,8 @@ class notifier:
                 'WELCOME MESSAGE': 'silver',
                 'ADVERTS': 'silver',
                 'SYSTEM': 'white',
-                'BOARDS TITLE': 'silver'
+                'BOARDS TITLE': 'silver',
+                'SCHEDULED MESSAGES': 'silver'
             },
             'COMMANDS': {
                 'PLAYERS LIST': 'players',
@@ -201,8 +208,6 @@ class notifier:
 
         if (self.Config['CONFIG_VERSION'] <= LATEST_CFG - 0.2) or DEV:
 
-            self.con('* Configuration version is too old, reseting to default')
-
             adverts = self.Config['ADVERTS']
 
             self.Config.clear()
@@ -211,13 +216,22 @@ class notifier:
 
             if not DEV: self.Config['ADVERTS'] = adverts
 
+            self.con('* Configuration file is two versions old, reseting to default (Advert messages saved!)')
+
         else:
 
-            self.con('* Applying new changes to configuration file')
+            self.Config['SETTINGS']['ENABLE SCHEDULED MESSAGES'] = True
 
-            self.Config['MESSAGES']['LEAVE MESSAGE'] = '{username} left the server. (Reason: {reason})'
+            self.Config['COLORS']['SCHEDULED MESSAGES'] = 'silver'
+
+            self.Config['SCHEDULED MESSAGES'] = {
+                '12:00': ('It is now <lime>{localtime}<end> of <lime>{localdate}<end>',),
+                '00:00': ('It is now <lime>{localtime}<end> of <lime>{localdate}<end>',)
+            }
 
             self.Config['CONFIG_VERSION'] = LATEST_CFG
+
+            self.con('* Applied new changes to the configuration file')
 
         self.SaveConfig()
 
@@ -246,7 +260,7 @@ class notifier:
 
         else: msg = self.format('<%s>%s<end>' % (color, text))
 
-        rust.BroadcastChat(msg, None, PROFILE if not profile else profile)
+        rust.BroadcastChat(msg, None, PLUGIN['ICON PROFILE'] if not profile else profile)
 
         self.con(text)
 
@@ -260,23 +274,21 @@ class notifier:
 
         else: msg = self.format('<%s>%s<end>' % (color, text))
 
-        rust.SendChatMessage(player, msg, None, PROFILE if not profile else profile)
+        rust.SendChatMessage(player, msg, None, PLUGIN['ICON PROFILE'] if not profile else profile)
 
     # -------------------------------------------------------------------------
     def log(self, filename, text):
         ''' Logs text into a specific file '''
 
-        if self.logs:
+        try:
 
-            try:
+            filename = 'notifier_%s_%s.txt' % (filename, self.log_date())
+            sv.Log('oxide/logs/%s' % filename, self.format(text, True))
 
-                filename = 'notifier_%s_%s.txt' % (filename, self.log_date())
-                sv.Log('oxide/logs/%s' % filename, self.format(text, True))
+        except:
 
-            except:
-
-                self.con('An error as occurred when writing a connection log to a file! ( Missing directory )')
-                self.con('Logs are now off, please make sure you have the following path on your server files: .../%s/oxide/logs' % sv.identity)
+            self.con('An error as occurred when writing a connection log to a file! ( Missing directory )')
+            self.con('Logs are now off, please make sure you have the following path on your server files: .../%s/oxide/logs' % sv.identity)
 
     # -------------------------------------------------------------------------
     # - PLUGIN HOOKS
@@ -291,16 +303,16 @@ class notifier:
 
         else: self.con('* Configuration file is up to date')
 
-        global MSG, PLUGIN, COLOR, CMDS, ADVERTS, RULES
-        MSG, COLOR, PLUGIN, CMDS, ADVERTS, RULES = [self.Config[x] for x in \
-        ('MESSAGES', 'COLORS', 'SETTINGS', 'COMMANDS', 'ADVERTS', 'RULES')]
+        global MSG, PLUGIN, COLOR, CMDS, ADVERTS, RULES, TIMED
+        MSG, COLOR, PLUGIN, CMDS, ADVERTS, RULES, TIMED = [self.Config[x] for x in \
+        ('MESSAGES', 'COLORS', 'SETTINGS', 'COMMANDS', 'ADVERTS', 'RULES', 'SCHEDULED MESSAGES')]
 
         self.prefix = '<%s>%s<end>' % (COLOR['PREFIX'], PLUGIN['PREFIX']) if PLUGIN['PREFIX'] else ''
         self.players = {}
         self.connected = []
         self.lastadvert = 0
         self.adverts_loop = False
-        self.logs = True
+        self.timed_loop = False
 
         self.countries = data.GetData('notifier_countries_db')
         self.countries.update(self.countries_dict())
@@ -320,9 +332,17 @@ class notifier:
 
             self.adverts_loop = timer.Repeat(secs, 0, Action(self.send_advert), self.Plugin)
 
-            self.con('* Starting Adverts loop, set to %s minute/s' % mins)
+            self.con('* Starting Adverts timer, set to %s minute/s' % mins)
 
         else: self.con('* Adverts are disabled')
+
+        if PLUGIN['ENABLE SCHEDULED MESSAGES']:
+
+            self.timed_loop = timer.Repeat(60, 0, Action(self.scheduled_messages), self.Plugin)
+
+            self.con('* Starting Scheduled Messages timer')
+
+        else: self.con('* Scheduled Messages are disabled')
 
         n = 0
 
@@ -359,6 +379,7 @@ class notifier:
         ''' Hook called on plugin unload '''
 
         if self.adverts_loop: self.adverts_loop.Destroy()
+        if self.timed_loop: self.timed_loop.Destroy()
 
     # -------------------------------------------------------------------------
     # - PLAYER HOOKS
@@ -747,21 +768,23 @@ class notifier:
 
             try:
 
-                if random.Range(1, 1000) == 1:
+                if random.Range(0, 5000) == 1:
 
-                    self.say('<silver>Who the hell is <purple>SAM?<end><end>', COLOR['ADVERTS'])
+                    a = (
+                        '3c707572706c653e53414141414d3c656e643e212121',
+                        '4865792c203c707572706c653e53414d3c656e643e3f21',
+                        '57686f207468652068656c6c206973203c707572706c653e53414d3c656e643e3f',
+                        '44696420616e79626f647920736177203c707572706c653e53414d3c656e643e2061726f756e643f',
+                        '4920626574203c707572706c653e53414d3c656e643e20697320686964696e6720736f6d65776865726521'
+                    )
+
+                    index = random.Range(0, len(a))
+
+                    self.say(binascii.unhexlify(a[index]), COLOR['ADVERTS'])
 
                 else:
 
-                    self.say(ADVERTS[index].format(
-                        players= len(self.activelist()),
-                        sleepers=len(self.sleeperlist()),
-                        localtime=time.strftime('%H:%M %p'),
-                        localdate=time.strftime('%m/%d/%Y'),
-                        gametime=' '.join(str(TOD_Sky.Instance.Cycle.DateTime).split()[1:]),
-                        gamedate=str(TOD_Sky.Instance.Cycle.DateTime).split()[0],
-                        server=sv),
-                    COLOR['ADVERTS'])
+                    self.say(self.name_formats(ADVERTS[index]), COLOR['ADVERTS'])
 
             except:
 
@@ -772,6 +795,37 @@ class notifier:
             self.con('The Adverts list is empty, stopping Adverts loop')
 
             self.adverts_loop.Destroy()
+
+    # -------------------------------------------------------------------------
+    def scheduled_messages(self):
+        ''' Function which broadcasts scheduled messages to chat '''
+
+        msg = False
+        now = time.strftime('%H:%M')
+
+        if now in TIMED: msg = TIMED[now]
+
+        if msg:
+
+            if isinstance(msg, str): msg = (msg,)
+
+            for i in msg:
+
+                self.say(self.name_formats(i), COLOR['SCHEDULED MESSAGES'])
+
+    # -------------------------------------------------------------------------
+    def name_formats(self, msg):
+        ''' Function to format name formats on advert messages '''
+
+        return msg.format(
+            players=len(self.activelist()),
+            sleepers=len(self.sleeperlist()),
+            localtime=time.strftime('%H:%M'),
+            localdate=time.strftime('%m/%d/%Y'),
+            gametime=' '.join(str(TOD_Sky.Instance.Cycle.DateTime).split()[1:]),
+            gamedate=str(TOD_Sky.Instance.Cycle.DateTime).split()[0],
+            server=sv
+        )
 
     # -------------------------------------------------------------------------
     def format(self, text, con=False):

@@ -2,10 +2,8 @@
   "allowAdminRotate": true,
   "allowDemolish": true,
   "allowDemolishDoors": false,
-  "allowRotate": true,
-  "allowRotateDoors": true,
-  "amountOfMinutesAfterUpgrade": 120,
-  "configVersion": "1.2.0",
-  "instanceIDs": [],
+  "amountOfMinutesAfterUpgrade": 10,
+  "configVersion": "1.3.0",
+  "positionsOfBuildingBlocks": [],
   "timesOfUpgrade": []
 }

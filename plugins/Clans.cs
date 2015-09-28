@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Oxide.Plugins {
-    [Info("Clans", "playrust.io / dcode", "1.5.4", ResourceId = 842)]
+    [Info("Clans", "playrust.io / dcode", "1.5.5", ResourceId = 842)]
     public class Clans : RustPlugin {
 
         #region Rust:IO Bindings
@@ -21,6 +21,7 @@ namespace Oxide.Plugins {
         private MethodInfo hasFriend;
         private MethodInfo addFriend;
         private MethodInfo deleteFriend;
+        internal static Clans Instance = null;
 
         FieldInfo displayName = typeof(BasePlayer).GetField("_displayName", (BindingFlags.Instance | BindingFlags.NonPublic));
 
@@ -323,6 +324,11 @@ namespace Oxide.Plugins {
                         SetupPlayer(player);
                 }
             }
+        }
+
+        [HookMethod("Init")]
+        void Init() {
+            Instance = this;
         }
 
         [HookMethod("OnServerInitialized")]
@@ -765,6 +771,9 @@ namespace Oxide.Plugins {
             if (string.IsNullOrEmpty(message))
                 return;
             myClan.Broadcast(StripTag(player.displayName, myClan) + ": " + message);
+            var playerId = player.userID.ToString();
+            var playerName = originalNames.ContainsKey(playerId) ? originalNames[playerId] : player.displayName;
+            Puts("[CLANCHAT] {0} - {1}: {2}", myClan.tag, playerName, message);
         }
 
         // Represents a clan

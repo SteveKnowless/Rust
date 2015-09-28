@@ -25,6 +25,7 @@
     "": "",
     "Base": "Base",
     "Calf": "Calf",
+    "Chest": "Chest",
     "Chickenrootbone": "Chickenrootbone",
     "Clavicle": "Clavicle",
     "Ear": "Ear",
@@ -35,15 +36,23 @@
     "Forearm": "Forearm",
     "Group": "Group",
     "Head": "Head",
+    "Hip": "Hip",
     "Horserootbone": "Horserootbone",
     "Jaw": "Jaw",
     "Jawend": "Jawend",
     "Joint": "Joint",
     "Lear": "Lear",
+    "Left Arm": "Left Arm",
+    "Left Eye": "Left Eye",
+    "Left Foot": "Left Foot",
+    "Left Forearm": "Left Forearm",
+    "Left Hand": "Left Hand",
+    "Left Knee": "Left Knee",
     "Lhip": "Lhip",
     "Liplower": "Liplower",
     "Little": "Little",
     "Lock": "Lock",
+    "Lower Spine": "Lower Spine",
     "Lrearfoot": "Lrearfoot",
     "Lrearshin": "Lrearshin",
     "Lrearthigh": "Lrearthigh",
@@ -60,6 +69,10 @@
     "Rforeshin": "Rforeshin",
     "Rforethigh": "Rforethigh",
     "Rhip": "Rhip",
+    "Right Arm": "Right Arm",
+    "Right Forearm": "Right Forearm",
+    "Right Hand": "Right Hand",
+    "Right Shoulder": "Right Shoulder",
     "Rlittle": "Rlittle",
     "Rrearfoot": "Rrearfoot",
     "Rrearshin": "Rrearshin",
@@ -69,11 +82,13 @@
     "Shoulder": "Shoulder",
     "Spine": "Spine",
     "Spineend": "Spineend",
+    "Stomach": "Stomach",
     "Tail": "Tail",
     "Thigh": "Thigh",
     "Toe": "Toe",
     "Tongue": "Tongue",
     "Ulna": "Ulna",
+    "Unknown Bodypart": "Unknown Bodypart",
     "Upperarm": "Upperarm",
     "Upperthigh": "Upperthigh"
   },
@@ -135,33 +150,66 @@
   },
   "CONFIG_VERSION": 4.7,
   "Messages": {
+    "Animal Death": [
+      "{attacker} killed a {victim} with a {weapon} from {distance}m."
+    ],
     "AnimalDeath": "{attacker} killed a {victim} with a {weapon} from {distance}m.",
     "Arrow": "{attacker} killed {victim} with an arrow at {distance}m, hitting the {bodypart}.",
+    "Arrow Sleep": [
+      "{attacker} killed {victim} with an arrow from {distance}m, while he slept."
+    ],
     "ArrowSleep": "{attacker} killed {victim} with an arrow from {distance}m, while he slept.",
     "Barricade": "{victim} died stuck on a {attacker}.",
     "Bite": "A {attacker} killed {victim}.",
+    "Bite Sleep": [
+      "A {attacker} killed {victim}, while he slept."
+    ],
     "BiteSleep": "A {attacker} killed {victim}, while he slept.",
     "Bleeding": "{victim} bled to death.",
     "Blunt": "{attacker} killed {victim} with a {weapon} and hit the {bodypart}.",
+    "Blunt Sleep": [
+      "{attacker} killed {victim} with a {weapon}, while he slept."
+    ],
     "BluntSleep": "{attacker} killed {victim} with a {weapon}, while he slept.",
     "Bullet": "{attacker} killed {victim} with a {weapon}, hitting the {bodypart} from {distance}m.",
+    "Bullet Sleep": [
+      "{attacker} killed {victim}, while sleeping. (In the {bodypart} with a {weapon}, from {distance}m)"
+    ],
     "BulletSleep": "{attacker} killed {victim}, while sleeping. (In the {bodypart} with a {weapon}, from {distance}m)",
     "Cold": "{victim} froze to death.",
     "Drowned": "{victim} thought he could swim.",
     "Explosion": "{victim} got blown up.",
+    "Explosion Sleep": [
+      "{victim} was dreaming while he got blown up by {attacker}'s {weapon}."
+    ],
     "Fall": "{victim} fell to his death.",
     "Generic": "{victim} died.",
     "Heat": "{victim} burned to death.",
+    "Helicopter": [
+      "{victim} was shot down by a {attacker}."
+    ],
     "Hunger": "{victim} starved to death.",
     "Poision": "{victim} died poisoned.",
+    "Poison": [
+      "{victim} died by poison."
+    ],
     "Radiation": "{victim} did not know that radiation kills.",
     "Slash": "{attacker} sliced {victim} into pieces with a {weapon} and hit the {bodypart}.",
+    "Slash Sleep": [
+      "{attacker} stabbed {victim}, while he slept."
+    ],
     "SlashSleep": "{attacker} stabbed {victim}, while he slept.",
     "Stab": "{attacker} stabbed {victim} to death with a {weapon} and hit the {bodypart}.",
+    "Stab Sleep": [
+      "{attacker} stabbed {victim}, while he slept."
+    ],
     "StabSleep": "{attacker} stabbed {victim}, while he slept.",
     "Suicide": "{victim} committed suicide.",
     "Thirst": "{victim} died dehydrated.",
-    "Trap": "{victim} stepped on a {attacker}."
+    "Trap": "{victim} stepped on a {attacker}.",
+    "Unknown": [
+      "{victim} died by an unknown reason."
+    ]
   },
   "MESSAGES": {
     "ANIMAL DEATH": [
@@ -260,11 +308,24 @@
     ]
   },
   "Settings": {
+    "Broadcast To Chat": true,
+    "Broadcast To Console": true,
     "BroadcastToConsole": true,
     "EnablePluginIcon": true,
+    "Message In Radius": false,
+    "Message Radius": 300,
     "MessageInRadius": false,
     "MessageRadius": 300,
+    "Plugin Icon": "76561198206240711",
     "Prefix": "DEATH NOTES<color=white>:</color>",
+    "Show Animal Deaths": false,
+    "Show Animal Kills": true,
+    "Show Barricade Deaths": true,
+    "Show Explosion Deaths": true,
+    "Show Metabolism Deaths": true,
+    "Show Player Kills": true,
+    "Show Suicides": true,
+    "Show Trap Deaths": true,
     "ShowAnimalDeaths": false,
     "ShowAnimalKills": true,
     "ShowBarricadeDeaths": true,
@@ -272,7 +333,8 @@
     "ShowMetabolismDeaths": true,
     "ShowPlayerKills": true,
     "ShowSuicides": true,
-    "ShowTrapDeaths": true
+    "ShowTrapDeaths": true,
+    "Use Popup Notifications": false
   },
   "SETTINGS": {
     "BROADCAST TO CONSOLE": true,
@@ -299,19 +361,31 @@
     "Assault Rifle": "Assault Rifle",
     "Bolt Action Rifle": "Bolt Action Rifle",
     "Bone Club": "Bone Club",
+    "Bone Knife": "Bone Knife",
     "Crossbow": "Crossbow",
+    "Custom SMG": "Custom SMG",
     "Eoka Pistol": "Eoka Pistol",
     "Hatchet": "Hatchet",
     "Hunting Bow": "Hunting Bow",
     "Longsword": "Longsword",
     "Mace": "Mace",
+    "Machete": "Machete",
+    "Pick Axe": "Pick Axe",
     "Pump Shotgun": "Pump Shotgun",
     "Rock": "Rock",
+    "Salvaged Cleaver": "Salvaged Cleaver",
+    "Salvaged Icepick": "Salvaged Icepick",
     "Salvaged Sword": "Salvaged Sword",
     "Semi-Automatic Pistol": "Semi-Automatic Pistol",
     "Stone Hatchet": "Stone Hatchet",
+    "Stone Pick Axe": "Stone Pick Axe",
+    "Stone Spear": "Stone Spear",
+    "Survey Charge": "Survey Charge",
     "Thompson": "Thompson",
-    "Torch": "Torch"
+    "Timed Explosive Charge": "Timed Explosive Charge",
+    "Torch": "Torch",
+    "Unknown Weapon": "Unknown Weapon",
+    "Wooden Spear": "Wooden Spear"
   },
   "WEAPONS": {
     "2HANDED_CLEAVER.WEAPON": "Salvaged Cleaver",

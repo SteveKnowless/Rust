@@ -9,13 +9,13 @@ using Oxide.Core.Plugins;
 
 namespace Oxide.Plugins
 {
-    [Info("RemoverTool", "Reneb", "3.0.5", ResourceId = 651)]
+    [Info("RemoverTool", "Reneb", "3.0.6", ResourceId = 651)]
     class RemoverTool : RustPlugin
     {
 
         static FieldInfo serverinput;
         static FieldInfo buildingPrivlidges;
-        static int constructionColl = UnityEngine.LayerMask.GetMask(new string[] { "Construction", "Deployable", "Prevent Building" });
+        static int constructionColl = UnityEngine.LayerMask.GetMask(new string[] { "Construction", "Deployable", "Prevent Building", "Deployed" });
         static int playerColl = UnityEngine.LayerMask.GetMask(new string[] { "Player (Server)" });
 
         enum RemoveType
@@ -31,7 +31,6 @@ namespace Oxide.Plugins
 
         void Loaded()
         {
-            json = json.Replace("{xmin}", xmin).Replace("{xmax}", xmax).Replace("{ymin}", ymin).Replace("{ymax}", ymax);
             serverinput = typeof(BasePlayer).GetField("serverInput", (BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic));
             buildingPrivlidges = typeof(BasePlayer).GetField("buildingPrivlidges", (BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic));
         }
@@ -44,6 +43,17 @@ namespace Oxide.Plugins
             if (!permission.PermissionExists(adminPermission)) permission.RegisterPermission(adminPermission, this);
             if (!permission.PermissionExists(allPermission)) permission.RegisterPermission(allPermission, this);
             if (!permission.PermissionExists(targetPermission)) permission.RegisterPermission(targetPermission, this);
+
+            mainjson = mainjson.Replace("{xmin}", xmin).Replace("{ymin}", ymin);
+            double xminint = Convert.ToSingle(xmin);
+            double yminint = Convert.ToSingle(ymin);
+            double xmaxint = Math.Floor((xminint + 0.20) * 100) / 100;
+            double ymaxint = Math.Floor((yminint + 0.25) * 100) / 100;
+
+            double yboxminint = 0.0;
+            if (!usePay)
+                yboxminint = 0.45;
+            mainjson = mainjson.Replace("{ymax}", ymaxint.ToString()).Replace("{xmax}", xmaxint.ToString()).Replace("{yboxmin}", yboxminint.ToString());
         }
 
         void Unload()
@@ -153,9 +163,7 @@ namespace Oxide.Plugins
             CheckCfg<string>("Message - Cant Use Remove With Item", ref MessageErrorCantUseRemoveWithItem);
 
             CheckCfg<string>("GUI - Position - X Min", ref xmin);
-            CheckCfg<string>("GUI - Position - X Max", ref xmax);
             CheckCfg<string>("GUI - Position - Y Min", ref ymin);
-            CheckCfg<string>("GUI - Position - Y Max", ref ymax);
 
             CheckCfg<int>("Remove - Default Time", ref RemoveTimeDefault);
             CheckCfg<int>("Remove - Max Remove Time", ref MaxRemoveTime);
@@ -359,6 +367,8 @@ namespace Oxide.Plugins
                 CancelInvoke("RefreshRemoveGui");
                 Invoke("DoDestroy", endTime);
                 InvokeRepeating("RefreshRemoveGui", 1, 1);
+                DestroyGUI(player);
+                NewGUI(this);
             }
 
             void DoDestroy()
@@ -395,8 +405,7 @@ namespace Oxide.Plugins
 
             void OnDestroy()
             {
-                if (player.net != null)
-                    CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = player.net.connection }, null, "DestroyUI", "RemoveMsg");
+                DestroyGUI(player);
                 if (playerActivator != player)
                 {
                     if (playerActivator.IsConnected())
@@ -410,151 +419,26 @@ namespace Oxide.Plugins
             if (toolremover == null) return;
             GameObject.Destroy(toolremover);
         }
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// GUI
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        public static string json = @"[  
-		{ 
-			""name"": ""RemoveMsg"",
-			""parent"": ""Overlay"",
-			""components"":
-			[
-				{
-					 ""type"":""UnityEngine.UI.Image"",
-					 ""color"":""0.1 0.1 0.1 0.7"",
-				},
-				{
-					""type"":""RectTransform"",
-					""anchormin"": ""{xmin} {ymin}"",
-					""anchormax"": ""{xmax} {ymax}""
-				}
-			]
-		},
-		{
-			""parent"": ""RemoveMsg"",
-			""components"":
-			[
-				{
-					""type"":""UnityEngine.UI.Text"",
-					""text"":""Remover Tool {removeType}"",
-					""fontSize"":15,
-					""align"": ""MiddleCenter"",
-				},
-				{
-					""type"":""RectTransform"",
-					""anchormin"": ""0.0 0.83"",
-					""anchormax"": ""1.0 0.98""
-				}
-			]
-		},
+        static void DestroyGUI(BasePlayer player)
         {
-			""parent"": ""RemoveMsg"",
-			""components"":
-			[
-				{
-					""type"":""UnityEngine.UI.Text"",
-					""text"":""Time left"",
-					""fontSize"":15,
-					""align"": ""MiddleLeft"",
-				},
-				{
-					""type"":""RectTransform"",
-					""anchormin"": ""0.05 0.65"",
-					""anchormax"": ""0.3 0.80""
-				}
-			]
-		},
-		{
-			""parent"": ""RemoveMsg"",
-			""components"":
-			[
-				{
-					""type"":""UnityEngine.UI.Text"",
-					""text"":""{timeleft}s"",
-					""fontSize"":15,
-					""align"": ""MiddleLeft"",
-				},
-				{
-					""type"":""RectTransform"",
-					""anchormin"": ""0.4 0.65"",
-					""anchormax"": ""1.0 0.80""
-				}
-			]
-		},
-		{
-			""parent"": ""RemoveMsg"",
-			""components"":
-			[
-				{
-					""type"":""UnityEngine.UI.Text"",
-					""text"":""Entity"",
-					""fontSize"":15,
-					""align"": ""MiddleLeft"",
-				},
-				{
-					""type"":""RectTransform"",
-					""anchormin"": ""0.05 0.50"",
-					""anchormax"": ""0.3 0.65""
-				}
-			]
-		},
+            if (player.net == null) return;
+            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = player.net.connection }, null, "DestroyUI", "RemoveMsg");
+        }
+        static void NewGUI(ToolRemover toolremover)
         {
-			""parent"": ""RemoveMsg"",
-			""components"":
-			[
-				{
-					""type"":""UnityEngine.UI.Text"",
-					""text"":""{entity}"",
-					""fontSize"":15,
-					""align"": ""MiddleLeft"",
-				},
-				{
-					""type"":""RectTransform"",
-					""anchormin"": ""0.4 0.50"",
-					""anchormax"": ""1.0 0.65""
-				}
-			]
-		},
-		{
-			""parent"": ""RemoveMsg"",
-			""components"":
-			[
-				{
-					""type"":""UnityEngine.UI.Text"",
-					""text"":""Cost"",
-					""fontSize"":15,
-					""align"": ""MiddleLeft"",
-				},
-				{
-					""type"":""RectTransform"",
-					""anchormin"": ""0.05 0.0"",
-					""anchormax"": ""0.3 0.50""
-				}
-			]
-		},
-        {
-			""parent"": ""RemoveMsg"",
-			""components"":
-			[
-				{
-					""type"":""UnityEngine.UI.Text"",
-					""text"":""{cost}"",
-					""fontSize"":15,
-					""align"": ""MiddleLeft"",
-				},
-				{
-					""type"":""RectTransform"",
-					""anchormin"": ""0.4 0.0"",
-					""anchormax"": ""1.0 0.5""
-				}
-			]
-		}
-		]
-		";
+            BasePlayer player = toolremover.player;
+            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = player.net.connection }, null, "AddUI", mainjson);
+            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = player.net.connection }, null, "AddUI", timeleftjsonheader);
+            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = player.net.connection }, null, "AddUI", titlejson.Replace("{removeType}", toolremover.removeType == RemoveType.Normal ? string.Empty : toolremover.removeType == RemoveType.Admin ? "(Admin)" : "(All)"));
+            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = player.net.connection }, null, "AddUI", entityjsonheader);
+            if(usePay)
+                CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = player.net.connection }, null, "AddUI", costjsonheader);
+        }
         static void RefreshGUI(ToolRemover toolPlayer)
         {
-            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = toolPlayer.player.net.connection }, null, "DestroyUI", "RemoveMsg");
+            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = toolPlayer.player.net.connection }, null, "DestroyUI", "RemoveTimeleftMsg");
+            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = toolPlayer.player.net.connection }, null, "DestroyUI", "RemoveEntityMsg");
+            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = toolPlayer.player.net.connection }, null, "DestroyUI", "RemoveCostMsg");
             string cost = string.Empty;
             string entity = string.Empty;
 
@@ -576,10 +460,197 @@ namespace Oxide.Plugins
                     }
                 }
             }
-            string pjson = json.Replace("{entity}", entity).Replace("{cost}", cost).Replace("{timeleft}", toolPlayer.timeLeft.ToString()).Replace("{removeType}", toolPlayer.removeType == RemoveType.Normal ? string.Empty : toolPlayer.removeType == RemoveType.Admin ? "(Admin)" : "(All)");
-            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = toolPlayer.player.net.connection }, null, "AddUI", pjson);
+            string ejson = entityjsonmsg.Replace("{entity}", entity);
+            string cjson = costjsonmsg.Replace("{cost}", cost);
+            string tjson = timeleftjsonmsg.Replace("{timeleft}", toolPlayer.timeLeft.ToString());
+            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = toolPlayer.player.net.connection }, null, "AddUI", ejson);
+            if(usePay)
+                CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = toolPlayer.player.net.connection }, null, "AddUI", cjson);
+
+            CommunityEntity.ServerInstance.ClientRPCEx(new Network.SendInfo() { connection = toolPlayer.player.net.connection }, null, "AddUI", tjson);
         }
 
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// GUI
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        public static string mainjson = @"[  
+		{ 
+			""name"": ""RemoveMsg"",
+			""parent"": ""Overlay"",
+			""components"":
+			[
+				{
+					 ""type"":""UnityEngine.UI.Image"",
+					 ""color"":""0 0 0 0"",
+				},
+				{
+					""type"":""RectTransform"",
+					""anchormin"": ""{xmin} {ymin}"",
+					""anchormax"": ""{xmax} {ymax}""
+				}
+			]
+		},
+        { 
+			""parent"": ""RemoveMsg"",
+			""components"":
+			[
+				{
+					 ""type"":""UnityEngine.UI.Image"",
+					 ""color"":""0.1 0.1 0.1 0.4"",
+				},
+				{
+					""type"":""RectTransform"",
+					""anchormin"": ""0 {yboxmin}"",
+					""anchormax"": ""1 1""
+				}
+			]
+		}
+        ]
+		";
+        public static string titlejson = @"[  
+		{
+			""parent"": ""RemoveMsg"",
+			""components"":
+			[
+				{
+					""type"":""UnityEngine.UI.Text"",
+					""text"":""<color=red>Remover Tool {removeType}</color>"", 
+					""fontSize"":15,
+					""align"": ""MiddleCenter"",
+				},
+				{
+					""type"":""RectTransform"",
+					""anchormin"": ""0.0 0.83"",
+					""anchormax"": ""1.0 0.98""
+				}
+			]
+		}
+        ]
+		";
+        public static string timeleftjsonheader = @"[  
+        {
+			""parent"": ""RemoveMsg"",
+			""components"":
+			[
+				{
+					""type"":""UnityEngine.UI.Text"",
+					""text"":""Time left"",
+					""fontSize"":15,
+					""align"": ""MiddleLeft"",
+				},
+				{
+					""type"":""RectTransform"",
+					""anchormin"": ""0.05 0.65"",
+					""anchormax"": ""0.3 0.80""
+				}
+			]
+		}
+        ]
+		";
+        public static string timeleftjsonmsg = @"[  
+		{
+            ""name"": ""RemoveTimeleftMsg"",
+			""parent"": ""RemoveMsg"",
+			""components"":
+			[
+				{
+					""type"":""UnityEngine.UI.Text"",
+					""text"":""{timeleft}s"",
+					""fontSize"":15,
+					""align"": ""MiddleLeft"",
+				},
+				{
+					""type"":""RectTransform"",
+					""anchormin"": ""0.4 0.65"",
+					""anchormax"": ""1.0 0.80""
+				}
+			]
+		}
+        ]
+		";
+        public static string entityjsonheader = @"[  
+		{
+			""parent"": ""RemoveMsg"",
+			""components"":
+			[
+				{
+					""type"":""UnityEngine.UI.Text"",
+					""text"":""Entity"",
+					""fontSize"":15,
+					""align"": ""MiddleLeft"",
+				},
+				{
+					""type"":""RectTransform"",
+					""anchormin"": ""0.05 0.50"",
+					""anchormax"": ""0.3 0.65""
+				}
+			]
+		}
+        ]
+		";
+        public static string entityjsonmsg = @"[  
+        {
+            ""name"": ""RemoveEntityMsg"",
+			""parent"": ""RemoveMsg"",
+			""components"":
+			[
+				{
+					""type"":""UnityEngine.UI.Text"",
+					""text"":""{entity}"",
+					""fontSize"":15,
+					""align"": ""MiddleLeft"",
+				},
+				{
+					""type"":""RectTransform"",
+					""anchormin"": ""0.4 0.50"",
+					""anchormax"": ""1.0 0.65""
+				}
+			]
+		}
+        ]
+		";
+        public static string costjsonheader = @"[  
+		{
+			""parent"": ""RemoveMsg"",
+			""components"":
+			[
+				{
+					""type"":""UnityEngine.UI.Text"",
+					""text"":""Cost"",
+					""fontSize"":15,
+					""align"": ""MiddleLeft"",
+				},
+				{
+					""type"":""RectTransform"",
+					""anchormin"": ""0.05 0.0"",
+					""anchormax"": ""0.3 0.50""
+				}
+			]
+		}
+        ]
+		";
+        public static string costjsonmsg = @"[ 
+        {
+            ""name"": ""RemoveCostMsg"",
+			""parent"": ""RemoveMsg"",
+			""components"":
+			[
+				{
+					""type"":""UnityEngine.UI.Text"",
+					""text"":""{cost}"",
+					""fontSize"":15,
+					""align"": ""MiddleLeft"",
+				},
+				{
+					""type"":""RectTransform"",
+					""anchormin"": ""0.4 0.0"",
+					""anchormax"": ""1.0 0.5""
+				}
+			]
+		}
+		]
+		";
+        
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// Remove functions
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -925,11 +996,13 @@ namespace Oxide.Plugins
                         if (!hasAccess(player, adminPermission, adminAuthLevel)) return;
                         removetype = RemoveType.Admin;
                         distanceRemove = adminDistanceRemove;
+                        if (args.Length > 1) int.TryParse(args[1], out removeTime);
                         break;
                     case "all":
                         if (!hasAccess(player, allPermission, adminAuthLevel)) return;
                         removetype = RemoveType.All;
                         distanceRemove = allDistanceRemove;
+                        if (args.Length > 1) int.TryParse(args[1], out removeTime);
                         break;
                     case "target":
                         if (!hasAccess(player, targetPermission, adminAuthLevel)) return;
