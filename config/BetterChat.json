@@ -4,9 +4,9 @@
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
     "NameColor": "#FF0000",
     "Permission": "color_donator",
-    "Rank": 1,
+    "Rank": 4,
     "TextColor": "white",
-    "Title": "∞Donator∞",
+    "Title": "∞ Donator ∞",
     "TitleColor": "#FF0000"
   },
   "mod": {
@@ -14,7 +14,7 @@
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
     "NameColor": "#FFC125",
     "Permission": "color_mod",
-    "Rank": 2,
+    "Rank": 5,
     "TextColor": "white",
     "Title": "₪ Diplomat ₪",
     "TitleColor": "#cd950c"
@@ -24,7 +24,7 @@
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
     "NameColor": "#ff0000",
     "Permission": "color_owner",
-    "Rank": 3,
+    "Rank": 6,
     "TextColor": "#bf3eff",
     "Title": "» OverLord «",
     "TitleColor": "black"
@@ -44,7 +44,7 @@
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
     "NameColor": "lime",
     "Permission": "color_proveteran",
-    "Rank": 1,
+    "Rank": 3,
     "TextColor": "white",
     "Title": "¤ Hunter ¤",
     "TitleColor": "#00cd00"
@@ -54,7 +54,7 @@
     "Formatting": "{Title} {Name}<color={TextColor}>:</color> {Message}",
     "NameColor": "#63b8ff",
     "Permission": "color_veteran",
-    "Rank": 1,
+    "Rank": 2,
     "TextColor": "white",
     "Title": "ǂ Scavenger ǂ",
     "TitleColor": "#5cacee"
